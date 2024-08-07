@@ -27,10 +27,6 @@ def convertToNumber(board, maxNumber):  # ユーザ入力の文字を数値に�
             # 左上から順に探索して見つかった順に数値を割り当てる
             charToNumberMap[cellValue] = len(charToNumberMap) + 1
 
-    # もしcharToNumberMapの要素数がmaxValueの値を超えていたら前提としてアウト
-    if len(charToNumberMap) > maxNumber:
-        print("文字の種類数がmaxNumberの数より多いため処理不可")
-
     # 配列の要素数がmaxNumberに達していないなら別のランダムな文字を割り振る
     if len(charToNumberMap) < maxNumber:
         # charToNumberMapがmaxNumberの値と同じになるまで繰り返し
@@ -120,7 +116,7 @@ def canBePlaced(board, currentPosition, x, maxNumber):  # 特定の位置に特�
     return True
 
 
-def validation(board, maxNumber):  # 入力盤面の正当性チェック
+def validation(charToNumberMap, board, maxNumber):  # 入力盤面の正当性チェック
     subBlockSize = int(maxNumber ** 0.5)
 
     # 同じ行の値が重複していないか
@@ -150,8 +146,12 @@ def validation(board, maxNumber):  # 入力盤面の正当性チェック
                 print("validation失敗 : 同じブロック内の重複")
                 return False
 
-    # 解が存在するかのチェック
-    def generateSudokuSolutionBoard(solutionBoard, currentPosition):
+    # 入力された盤面の文字の種類数がmaxNumberを超えていないか
+    if (len(charToNumberMap) > maxNumber):
+        print("validation失敗 : 入力された盤面の文字の種類数がmaxNumberを超えている")
+        return False
+
+    def generateSudokuSolutionBoard(solutionBoard, currentPosition):  # 解が存在するかのチェック
         # すべてのセルが埋まった場合
         if currentPosition == maxNumber * maxNumber:
             return True  # 解答が見つかったことを示す
@@ -201,9 +201,10 @@ def generateSudoku():  # 数独パズルを生成, メインの関数
 
     # 盤面の文字を数値に変換
     dataConvertedToNumbers = convertToNumber(board, maxNumber)
+    print(dataConvertedToNumbers)
 
     # 入力ファイルの正当性チェック.そもそも唯一解を出せる入力なのか？
-    if not validation(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber):
+    if not validation(dataConvertedToNumbers['charToNumberMap'], dataConvertedToNumbers['boardConvertedToNumber'], maxNumber):
         print("バリデーション失敗")
         return False
 
