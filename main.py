@@ -107,20 +107,20 @@ def canBePlaced(board, currentPosition, x, maxNumber):  # 特定の位置に特�
 
     # 行と列に同じ数字がないかチェック
     for i in range(maxNumber):
-        if board[rows * maxNumber + i] == x or board[columns + i * maxNumber] == x:
+        if board[rows][i] == x or board[i][columns] == x:
             return False
 
     # サブブロックに同じ数字がないかチェック
-    topLeftCellOfSubblock = maxNumber * (rows // subBlockSize) * subBlockSize + (columns // subBlockSize) * subBlockSize
+    topLeftCellOfSubblock = (rows // subBlockSize) * subBlockSize
     for i in range(subBlockSize):
         for j in range(subBlockSize):
-            if board[topLeftCellOfSubblock + i * maxNumber + j] == x:
+            if board[topLeftCellOfSubblock + i][(columns // subBlockSize) * subBlockSize + j] == x:
                 return False
 
     return True
 
 
-def validation(board, currentPosition, maxNumber):  # 入力盤面の正当性チェック
+def validation(board, maxNumber):  # 入力盤面の正当性チェック
     subBlockSize = int(maxNumber ** 0.5)
 
     # 同じ行の値が重複していないか
@@ -150,6 +150,42 @@ def validation(board, currentPosition, maxNumber):  # 入力盤面の正当性�
                 print("validation失敗 : 同じブロック内の重複")
                 return False
 
+    # 解が存在するかのチェック
+    def generateSudokuSolutionBoard(solutionBoard, currentPosition):
+        # すべてのセルが埋まった場合
+        if currentPosition == maxNumber * maxNumber:
+            return True  # 解答が見つかったことを示す
+
+        # 次にチェックする位置を新しい変数 newPosition に代入
+        newPosition = currentPosition
+        # 既に数字が埋まっているセルをスキップするループ
+        while newPosition < maxNumber * maxNumber and solutionBoard[newPosition // maxNumber][newPosition % maxNumber] != 0:
+            newPosition += 1
+
+        # 1 から maxNumber までの数字をランダムに並べたリストを生成
+        randomNumbers = random.sample(range(1, maxNumber + 1), maxNumber)
+
+        # ランダムな数字のリストを順に試すループ
+        for x in randomNumbers:
+            # 数字 x が現在の位置 newPosition に配置可能かをチェック
+            if canBePlaced(solutionBoard, newPosition, x, maxNumber):
+                # 配置可能な場合、盤面に数字 x を配置
+                solutionBoard[newPosition // maxNumber][newPosition % maxNumber] = x
+                # 次の位置に進んで再帰的にチェックを続ける
+                if generateSudokuSolutionBoard(solutionBoard, newPosition + 1):
+                    return True  # 解答が見つかった場合、True を返す
+                # 解答が見つからなかった場合、配置した数字をリセットして次の数字を試す
+                solutionBoard[newPosition // maxNumber][newPosition % maxNumber] = 0
+
+        # すべての数字を試しても解答が見つからなかった場合、False を返す
+        return False
+
+    # 空の盤面を用意して解が存在するかをチェック
+    solutionBoard = [row[:] for row in board]  # boardのコピーを作成
+    if not generateSudokuSolutionBoard(solutionBoard, 0):
+        print("validation失敗 : 解が存在しない")
+        return False
+
     return True
 
 
@@ -178,7 +214,7 @@ def generateSudoku():  # 数独パズルを生成, メインの関数
     problem, choices = formulateSudoku(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
 
     # 入力ファイルの正当性チェック.そもそも唯一解を出せる入力なのか？
-    if not validation(dataConvertedToNumbers['boardConvertedToNumber'], 0, maxNumber):
+    if not validation(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber):
         print("バリデーション失敗")
         return False
 
@@ -187,6 +223,8 @@ def generateSudoku():  # 数独パズルを生成, メインの関数
     # 配置ヒント数の統一処理
 
     # 唯一解への調整処理
+
+    return True
 
 
 startTime = time.time()
