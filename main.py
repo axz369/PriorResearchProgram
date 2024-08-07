@@ -5,9 +5,7 @@ import string
 from pulp import LpProblem, LpVariable, LpMinimize, lpSum, LpStatus
 
 
-
-# ユーザ入力の文字を数値に変換する関数
-def convertToNumber(board, maxNumber):
+def convertToNumber(board, maxNumber):  # ユーザ入力の文字を数値に変換する関数
     # maxNumber種類(9種類)のアルファベットを格納する辞書
     charToNumberMap = {}
     # 数値に変換後の盤面
@@ -43,7 +41,6 @@ def convertToNumber(board, maxNumber):
                 continue
             charToNumberMap[randomUppercaseLetter] = len(charToNumberMap) + 1
 
-
     # 盤面を数値に変換する
     for row in range(len(board)):  # 行の繰り返し
         for col in range(len(board[row])):  # 列の繰り返し
@@ -60,12 +57,7 @@ def convertToNumber(board, maxNumber):
     }
 
 
-
-
-
-
-# 定式化
-def formulateSudoku(board, maxNumber):
+def formulateSudoku(board, maxNumber):  # 定式化
     # オブジェクト作成
     problem = LpProblem("SudokuProblem", LpMinimize)
 
@@ -76,8 +68,8 @@ def formulateSudoku(board, maxNumber):
     # 与えられた値をそのまま使用する制約を追加
     for row in range(maxNumber):
         for col in range(maxNumber):
-            if board[row][col] != 0: # もし初期盤面の該当セルに値が入っていたら
-                problem += choices[row][col][board[row][col]] == 1 # (row, col）に数字board[row][col]が入るという制約を追加
+            if board[row][col] != 0:  # もし初期盤面の該当セルに値が入っていたら
+                problem += choices[row][col][board[row][col]] == 1  # (row, col）に数字board[row][col]が入るという制約を追加
 
     # 各行に同じ値が入らない制約
     for row in range(maxNumber):
@@ -94,9 +86,9 @@ def formulateSudoku(board, maxNumber):
     for subBlockRow in range(subBlockSize):
         for subBlockCol in range(subBlockSize):
             for num in range(1, maxNumber + 1):
-                problem += lpSum([choices[row][col][num] 
-                    for row in range(subBlockRow * subBlockSize, (subBlockRow + 1) * subBlockSize) 
-                    for col in range(subBlockCol * subBlockSize, (subBlockCol + 1) * subBlockSize)]) == 1
+                problem += lpSum([choices[row][col][num]
+                                  for row in range(subBlockRow * subBlockSize, (subBlockRow + 1) * subBlockSize)
+                                  for col in range(subBlockCol * subBlockSize, (subBlockCol + 1) * subBlockSize)]) == 1
 
     # 各セルに1つの値が入る制約
     for row in range(maxNumber):
@@ -108,20 +100,68 @@ def formulateSudoku(board, maxNumber):
     return problem, choices
 
 
+def canBePlaced(board, currentPosition, x, maxNumber):  # 特定の位置に特定の数字が配置可能かどうかをチェックする関数
+    subBlockSize = int(maxNumber ** 0.5)
+    rows = currentPosition // maxNumber  # 行を計算
+    columns = currentPosition % maxNumber  # 列を計算
+
+    # 行と列に同じ数字がないかチェック
+    for i in range(maxNumber):
+        if board[rows * maxNumber + i] == x or board[columns + i * maxNumber] == x:
+            return False
+
+    # サブブロックに同じ数字がないかチェック
+    topLeftCellOfSubblock = maxNumber * (rows // subBlockSize) * subBlockSize + (columns // subBlockSize) * subBlockSize
+    for i in range(subBlockSize):
+        for j in range(subBlockSize):
+            if board[topLeftCellOfSubblock + i * maxNumber + j] == x:
+                return False
+
+    return True
 
 
+def validation(board, currentPosition, maxNumber):  # 入力盤面の正当性チェック
+    subBlockSize = int(maxNumber ** 0.5)
+
+    # 同じ行の値が重複していないか
+    for row in range(maxNumber):
+        row_values = [val for val in board[row] if val != 0]
+        if len(set(row_values)) != len(row_values):
+            print("validation失敗 : 同じ行内の重複")
+            return False
+
+    # 同じ列の値が重複していないか
+    for col in range(maxNumber):
+        col_values = [board[row][col] for row in range(maxNumber) if board[row][col] != 0]
+        if len(set(col_values)) != len(col_values):
+            print("validation失敗 : 同じ列内の重複")
+            return False
+
+    # 同じブロックの値が重複していないか
+    for subBlockRow in range(subBlockSize):
+        for subBlockCol in range(subBlockSize):
+            block_values = []
+            for row in range(subBlockSize):
+                for col in range(subBlockSize):
+                    cell_value = board[subBlockRow * subBlockSize + row][subBlockCol * subBlockSize + col]
+                    if cell_value != 0:
+                        block_values.append(cell_value)
+            if len(set(block_values)) != len(block_values):
+                print("validation失敗 : 同じブロック内の重複")
+                return False
+
+    return True
 
 
-#def validation(board):   
-# okなら1 ngなら0を返却
+def solveSudoku(problem, choices, maxNumber):  # 数独を解く関数
+    # 問題を解く
+    problem.solve()
+
+    # 結果を返却
+    return LpStatus[problem.status] == 'Optimal'
 
 
-
-
-
-
-# 数独パズルを生成, メインの関数
-def generateSudoku():
+def generateSudoku():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
     with open('input.json', 'r') as file:
         data = json.load(file)
@@ -133,26 +173,24 @@ def generateSudoku():
 
     # 盤面の文字を数値に変換
     dataConvertedToNumbers = convertToNumber(board, maxNumber)
-    print(dataConvertedToNumbers)
-
 
     # 定式化する
-
-    # ファイル分けたい
+    problem, choices = formulateSudoku(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
 
     # 入力ファイルの正当性チェック.そもそも唯一解を出せる入力なのか？
-    # if(validation(dataConvertedToNumbers) == 0)処理を終了
+    if not validation(dataConvertedToNumbers['boardConvertedToNumber'], 0, maxNumber):
+        print("バリデーション失敗")
+        return False
 
-    # 対象位置へのヒント配列処理
+    # 対称軸にヒントを追加
 
     # 配置ヒント数の統一処理
 
     # 唯一解への調整処理
 
 
-
 startTime = time.time()
-generateSudoku()
+isSolved = generateSudoku()
 endTime = time.time()
 generationTime = endTime - startTime
 print(f"生成時間: {generationTime:.2f}秒")
