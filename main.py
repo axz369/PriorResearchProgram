@@ -189,14 +189,6 @@ def validation(board, maxNumber):  # 入力盤面の正当性チェック
     return True
 
 
-def solveSudoku(problem, choices, maxNumber):  # 数独を解く関数
-    # 問題を解く
-    problem.solve()
-
-    # 結果を返却
-    return LpStatus[problem.status] == 'Optimal'
-
-
 def generateSudoku():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
     with open('input.json', 'r') as file:
@@ -210,21 +202,20 @@ def generateSudoku():  # 数独パズルを生成, メインの関数
     # 盤面の文字を数値に変換
     dataConvertedToNumbers = convertToNumber(board, maxNumber)
 
-    # 定式化する
-    problem, choices = formulateSudoku(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
-
     # 入力ファイルの正当性チェック.そもそも唯一解を出せる入力なのか？
     if not validation(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber):
         print("バリデーション失敗")
         return False
 
-    # 対称軸にヒントを追加
+    # 定式化する
+    problem, choices = formulateSudoku(dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
 
-    # 配置ヒント数の統一処理
+    # 問題を解く
+    problem.solve()
 
-    # 唯一解への調整処理
-
-    return True
+    # 解が見つかったかどうかを返す
+    return LpStatus[problem.status] == 'Optimal'
+    print(f"解の有無: {'解あり' if isSolved else '解なし'}")
 
 
 startTime = time.time()
