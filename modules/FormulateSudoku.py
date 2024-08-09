@@ -7,9 +7,9 @@ class FormulateSudoku:
         self.maxNumber = maxNumber
         self.problem = None
         self.choices = None
-        self.formulate()  # キャメルケース
+        self.formulate()
 
-    def formulate(self):  # キャメルケース
+    def formulate(self):
         # 問題を作成
         self.problem = LpProblem("SudokuProblem", LpMinimize)
 
