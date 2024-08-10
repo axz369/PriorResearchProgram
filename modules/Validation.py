@@ -7,6 +7,7 @@ class Validation:
         self.board = board
         self.maxNumber = maxNumber
         self.subBlockSize = int(maxNumber ** 0.5)
+        self.MAX_RECURSION_DEPTH = 1000  # 再帰の最大深さを設定
 
     def check(self):
         if not self.checkRows():
@@ -22,31 +23,31 @@ class Validation:
         return True
 
     def checkRows(self):
-        for row in range(self.maxNumber):
-            rowValues = [val for val in self.board[row] if val != 0]
-            if len(set(rowValues)) != len(rowValues):
+        for row in self.board:
+            values = [val for val in row if val != 0]
+            if len(set(values)) != len(values):
                 print("Validation失敗 : 同じ行内の重複")
                 return False
         return True
 
     def checkColumns(self):
         for col in range(self.maxNumber):
-            colValues = [self.board[row][col] for row in range(self.maxNumber) if self.board[row][col] != 0]
-            if len(set(colValues)) != len(colValues):
+            values = [self.board[row][col] for row in range(self.maxNumber) if self.board[row][col] != 0]
+            if len(set(values)) != len(values):
                 print("Validation失敗 : 同じ列内の重複")
                 return False
         return True
 
     def checkBlocks(self):
-        for subBlockRow in range(self.subBlockSize):
-            for subBlockCol in range(self.subBlockSize):
-                blockValues = []
+        for block_row in range(self.subBlockSize):
+            for block_col in range(self.subBlockSize):
+                values = []
                 for row in range(self.subBlockSize):
                     for col in range(self.subBlockSize):
-                        cellValue = self.board[subBlockRow * self.subBlockSize + row][subBlockCol * self.subBlockSize + col]
-                        if cellValue != 0:
-                            blockValues.append(cellValue)
-                if len(set(blockValues)) != len(blockValues):
+                        value = self.board[block_row * self.subBlockSize + row][block_col * self.subBlockSize + col]
+                        if value != 0:
+                            values.append(value)
+                if len(set(values)) != len(values):
                     print("Validation失敗 : 同じブロック内の重複")
                     return False
         return True
@@ -59,35 +60,31 @@ class Validation:
 
     def checkSolutionExists(self):
         solutionBoard = [row[:] for row in self.board]  # boardのコピーを作成
-        return self.generateSolutionBoard(solutionBoard, 0)
+        return self.generateSolutionBoard(solutionBoard, 0, 0)
 
-    def generateSolutionBoard(self, solutionBoard, currentPosition):
-        canBePlacedChecker = CanBePlaced(solutionBoard, self.maxNumber)  # クラスインスタンス化
+    def generateSolutionBoard(self, solutionBoard, currentPosition, depth):
+        if depth > self.MAX_RECURSION_DEPTH:
+            return False  # 再帰の深さが最大値を超えたら False を返す
 
-        # すべてのセルが埋まった場合
+        canBePlacedChecker = CanBePlaced(solutionBoard, self.maxNumber)
+
         if currentPosition == self.maxNumber * self.maxNumber:
-            return True  # 解答が見つかったことを示す
+            return True
 
-        # 次にチェックする位置を新しい変数 newPosition に代入
         newPosition = currentPosition
-        # 既に数字が埋まっているセルをスキップするループ
         while newPosition < self.maxNumber * self.maxNumber and solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] != 0:
             newPosition += 1
 
-        # 1 から maxNumber までの数字をランダムに並べたリストを生成
+        if newPosition == self.maxNumber * self.maxNumber:
+            return True
+
         randomNumbers = random.sample(range(1, self.maxNumber + 1), self.maxNumber)
 
-        # ランダムな数字のリストを順に試すループ
         for x in randomNumbers:
-            # 数字 x が現在の位置 newPosition に配置可能かをチェック
-            if canBePlacedChecker.check(newPosition, x):  # クラスのメソッドを使用
-                # 配置可能な場合、盤面に数字 x を配置
+            if canBePlacedChecker.check(newPosition, x):
                 solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] = x
-                # 次の位置に進んで再帰的にチェックを続ける
-                if self.generateSolutionBoard(solutionBoard, newPosition + 1):
-                    return True  # 解答が見つかった場合、True を返す
-                # 解答が見つからなかった場合、配置した数字をリセットして次の数字を試す
+                if self.generateSolutionBoard(solutionBoard, newPosition + 1, depth + 1):
+                    return True
                 solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] = 0
 
-        # すべての数字を試しても解答が見つからなかった場合、False を返す
         return False
