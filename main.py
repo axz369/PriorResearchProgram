@@ -14,7 +14,7 @@ def main():  # 数独パズルを生成, メインの関数
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input1"]
+    sudokuProblem = data["inputs"]["input6"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
@@ -33,18 +33,24 @@ def main():  # 数独パズルを生成, メインの関数
     # 線対称にヒントを追加
     symmetryAdder = AddHintToLineSymmetry(
         dataConvertedToNumbers['boardConvertedToNumber'])
-    symmetryAdder.addSymmetry()
-    symmetricBoard = symmetryAdder.getSymmetricBoard()
+    symmetricBoards = symmetryAdder.getSymmetricBoards()  # 4つの対称盤面を取得
 
-    # symmetricBoardをJSON形式でsymmetric.jsonとして保存
+    # 対称性の名前
+    symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
+                     "diagonalSymmetry", "antiDiagonalSymmetry"]
+
+    # 盤面を辞書形式で保存
+    symmetricBoardsDict = {}
+    for i, board in enumerate(symmetricBoards):
+        symmetricBoardsDict[symmetryNames[i]] = board
+
+    # symmetricBoardsDictをJSON形式でsymmetric.jsonとして保存
     with open('symmetric.json', 'w', encoding='utf-8') as f:
-        json.dump(symmetricBoard, f, ensure_ascii=False, indent=4)
+        json.dump(symmetricBoardsDict, f, ensure_ascii=False, indent=4)
 
     print("symmetric.jsonファイルが生成されました。")
 
-    # input6を処理できないので後でAddHintToLineを書き直す
-
-    # どの線対称にするかをランダムに選んだのでヒント数の統一はなしにする
+    # ヒント数の統一処理
 
     # 定式化する
     # sudokuFormulator = FormulateSudoku(
