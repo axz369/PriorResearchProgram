@@ -7,7 +7,6 @@ from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
 from modules.UnifiedNumberOfHints import UnifiedNumberOfHints  # クラスをインポート
 
-
 def main():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
     with open('input.json', 'r') as file:
@@ -40,33 +39,24 @@ def main():  # 数独パズルを生成, メインの関数
     hintUnifier = UnifiedNumberOfHints(symmetricBoards, targetHintCount=28)
     unifiedBoards = hintUnifier.unifyHints()
 
+    # 数値から元の文字盤面に戻す
+    unifiedBoardsAsChars = []
+    for board in unifiedBoards:
+        unifiedBoardsAsChars.append(converter.convertBack(board))
+
     # 確認のためファイルを作る
     # 対称性の名前
     symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
                      "diagonalSymmetry", "antiDiagonalSymmetry"]
     # 盤面を辞書形式で保存
     unifiedBoardsDict = {}
-    for i, board in enumerate(unifiedBoards):
+    for i, board in enumerate(unifiedBoardsAsChars):
         unifiedBoardsDict[symmetryNames[i]] = board
     # unifiedBoardsDictをJSON形式でunified_symmetric.jsonとして保存
     with open('unified_symmetric.json', 'w', encoding='utf-8') as f:
         json.dump(unifiedBoardsDict, f, ensure_ascii=False, indent=4)
 
     print("unified_symmetric.jsonファイルが生成されました。")
-
-    # ユーザに見せて一つ選ばせるときは文字に変換してから
-
-    # 定式化する
-    # sudokuFormulator = FormulateSudoku(
-    #    dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
-    # problem, choices = sudokuFormulator.getProblemAndChoices()
-
-    # 問題を解く
-    # problem.solve()
-
-    # 解が見つかったかどうかを返す
-    # return LpStatus[problem.status] == 'Optimal'
-
 
 if __name__ == "__main__":
     startTime = time.time()
