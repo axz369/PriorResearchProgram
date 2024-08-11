@@ -3,9 +3,9 @@ import json
 from pulp import LpStatus
 
 from modules.ConvertToNumber import ConvertToNumber
-from modules.FormulateSudoku import FormulateSudoku
 from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
+from modules.UnifiedNumberOfHints import UnifiedNumberOfHints  # クラスをインポート
 
 
 def main():  # 数独パズルを生成, メインの関数
@@ -14,7 +14,7 @@ def main():  # 数独パズルを生成, メインの関数
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input6"]
+    sudokuProblem = data["inputs"]["input1"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
@@ -34,23 +34,27 @@ def main():  # 数独パズルを生成, メインの関数
     symmetryAdder = AddHintToLineSymmetry(
         dataConvertedToNumbers['boardConvertedToNumber'])
     symmetricBoards = symmetryAdder.getSymmetricBoards()  # 4つの対称盤面を取得
+    print(symmetricBoards)
 
+    # ヒント数の統一処理
+    hintUnifier = UnifiedNumberOfHints(symmetricBoards, targetHintCount=28)
+    unifiedBoards = hintUnifier.unifyHints()
+
+    # 確認のためファイルを作る
     # 対称性の名前
     symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
                      "diagonalSymmetry", "antiDiagonalSymmetry"]
-
     # 盤面を辞書形式で保存
-    symmetricBoardsDict = {}
-    for i, board in enumerate(symmetricBoards):
-        symmetricBoardsDict[symmetryNames[i]] = board
+    unifiedBoardsDict = {}
+    for i, board in enumerate(unifiedBoards):
+        unifiedBoardsDict[symmetryNames[i]] = board
+    # unifiedBoardsDictをJSON形式でunified_symmetric.jsonとして保存
+    with open('unified_symmetric.json', 'w', encoding='utf-8') as f:
+        json.dump(unifiedBoardsDict, f, ensure_ascii=False, indent=4)
 
-    # symmetricBoardsDictをJSON形式でsymmetric.jsonとして保存
-    with open('symmetric.json', 'w', encoding='utf-8') as f:
-        json.dump(symmetricBoardsDict, f, ensure_ascii=False, indent=4)
+    print("unified_symmetric.jsonファイルが生成されました。")
 
-    print("symmetric.jsonファイルが生成されました。")
-
-    # ヒント数の統一処理
+    # ユーザに見せて一つ選ばせるときは文字に変換してから
 
     # 定式化する
     # sudokuFormulator = FormulateSudoku(
