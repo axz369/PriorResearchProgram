@@ -5,7 +5,9 @@ from pulp import LpStatus
 from modules.ConvertToNumber import ConvertToNumber
 from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
-from modules.UnifiedNumberOfHints import UnifiedNumberOfHints  # クラスをインポート
+from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
+from utility.displayBoards import displayBoards
+from utility.getUserChoice import getUserChoice 
 
 def main():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
@@ -44,20 +46,20 @@ def main():  # 数独パズルを生成, メインの関数
     for board in unifiedBoards:
         unifiedBoardsAsChars.append(converter.convertBack(board))
 
-    # 確認のためファイルを作る
     # 対称性の名前
     symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
                      "diagonalSymmetry", "antiDiagonalSymmetry"]
-    # 盤面を辞書形式で保存
-    unifiedBoardsDict = {}
-    for i, board in enumerate(unifiedBoardsAsChars):
-        unifiedBoardsDict[symmetryNames[i]] = board
-    # unifiedBoardsDictをJSON形式でunified_symmetric.jsonとして保存
-    with open('unified_symmetric.json', 'w', encoding='utf-8') as f:
-        json.dump(unifiedBoardsDict, f, ensure_ascii=False, indent=4)
 
-    print("unified_symmetric.jsonファイルが生成されました。")
+    # 盤面を表示してユーザに選択させる
+    displayBoards(unifiedBoardsAsChars, symmetryNames)
+    userChoice = getUserChoice(symmetryNames)
 
+    # 選択された盤面を取得
+    selectedBoard = unifiedBoards[userChoice]
+    selectedBoardName = symmetryNames[userChoice]
+
+    print(f"\n選ばれた盤面: {selectedBoardName}")
+    
 if __name__ == "__main__":
     startTime = time.time()
     isSolved = main()
