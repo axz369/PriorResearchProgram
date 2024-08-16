@@ -67,8 +67,7 @@ def main():  # 数独パズルを生成, メインの関数
     # 唯一解が見つかったかどうかを確認
     if uniqueSolution is not None:
         print("\n唯一解が生成されました:")
-        for row in uniqueSolution:
-            print(" ".join(map(str, row)))
+        uniqueSolutionGenerator.printBoard(uniqueSolution)
 
         # 数字のまま保存
         with open('numberOutput.json', 'w', encoding='utf-8') as f:

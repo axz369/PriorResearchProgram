@@ -2,105 +2,159 @@ import pulp
 
 class GenerateUniqueSolution:
     def __init__(self, board, maxNumber):
-        self.board = board
+        # 初期盤面と盤面のサイズを設定
+        self.c1 = board
         self.maxNumber = maxNumber
         self.subBlockSize = int(maxNumber ** 0.5)
-        self.problem = pulp.LpProblem("Sudoku", pulp.LpMaximize)
+        
+        # 線形計画問題を初期化
+        self.problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
+        
+        # 決定変数を作成: choices[r][c][v] は r行c列にvが入るかどうかを表す
         self.choices = pulp.LpVariable.dicts(
             "Choice", 
-            (range(maxNumber), range(maxNumber), range(maxNumber)),
+            (range(maxNumber), range(maxNumber), range(1, maxNumber + 1)),
             cat=pulp.LpBinary
         )
-        self.solutionCount = 0
-        self.solutionArray = [[[0 for _ in range(maxNumber)] for _ in range(maxNumber)] for _ in range(maxNumber)]
+        
+        # 解の出現回数を記録するための3次元配列
+        self.memoryArray = [[[0 for _ in range(maxNumber)] for _ in range(maxNumber)] for _ in range(maxNumber)]
 
     def formulateConstraints(self):
-        # (1) 一つのマスには一つの文字が入る
-        for i in range(self.maxNumber):
-            for j in range(self.maxNumber):
-                self.problem += pulp.lpSum([self.choices[i][j][k] for k in range(self.maxNumber)]) == 1
+        print("制約条件の設定を開始します。")
+        
+        # 制約1: 各マスには1つの数字のみが入る
+        for r in range(self.maxNumber):
+            for c in range(self.maxNumber):
+                self.problem += pulp.lpSum(self.choices[r][c][v] for v in range(1, self.maxNumber + 1)) == 1
 
-        # (2) 同じ列にはすべて違う値が入る
-        for j in range(self.maxNumber):
-            for k in range(self.maxNumber):
-                self.problem += pulp.lpSum([self.choices[i][j][k] for i in range(self.maxNumber)]) == 1
+        # 制約2: 各行には1からmaxNumberまでの数字が1つずつ入る
+        for r in range(self.maxNumber):
+            for v in range(1, self.maxNumber + 1):
+                self.problem += pulp.lpSum(self.choices[r][c][v] for c in range(self.maxNumber)) == 1
 
-        # (3) 同じ行にはすべて違う値が入る
-        for i in range(self.maxNumber):
-            for k in range(self.maxNumber):
-                self.problem += pulp.lpSum([self.choices[i][j][k] for j in range(self.maxNumber)]) == 1
+        # 制約3: 各列には1からmaxNumberまでの数字が1つずつ入る
+        for c in range(self.maxNumber):
+            for v in range(1, self.maxNumber + 1):
+                self.problem += pulp.lpSum(self.choices[r][c][v] for r in range(self.maxNumber)) == 1
 
-        # (4) 同じブロックにはすべて違う値が入る
-        for k in range(self.maxNumber):
-            for blockRow in range(self.subBlockSize):
-                for blockCol in range(self.subBlockSize):
-                    self.problem += pulp.lpSum(
-                        [self.choices[i][j][k] 
-                         for i in range(blockRow * self.subBlockSize, (blockRow + 1) * self.subBlockSize)
-                         for j in range(blockCol * self.subBlockSize, (blockCol + 1) * self.subBlockSize)]
-                    ) == 1
+        # 制約4: 各ブロックには1からmaxNumberまでの数字が1つずつ入る
+        for br in range(self.subBlockSize):
+            for bc in range(self.subBlockSize):
+                for v in range(1, self.maxNumber + 1):
+                    self.problem += pulp.lpSum(self.choices[r][c][v] 
+                                               for r in range(br*self.subBlockSize, (br+1)*self.subBlockSize) 
+                                               for c in range(bc*self.subBlockSize, (bc+1)*self.subBlockSize)) == 1
 
-        # (5) 既配置ヒントの定式化
-        for i in range(self.maxNumber):
-            for j in range(self.maxNumber):
-                if self.board[i][j] != 0:
-                    k = self.board[i][j] - 1  # インデックスを0から開始するために1を減算
-                    self.problem += self.choices[i][j][k] == 1
+        # 制約5: 既に数字が入っているマスの制約
+        for r in range(self.maxNumber):
+            for c in range(self.maxNumber):
+                if self.c1[r][c] != 0:
+                    self.problem += self.choices[r][c][self.c1[r][c]] == 1
 
-    def addExclusionConstraint(self, solution):
-        # (6) 探索済み盤面パターンを除外する制約を追加
-        exclusionConstraint = pulp.lpSum(
-            self.choices[i][j][solution[i][j] - 1]
-            for i in range(self.maxNumber)
-            for j in range(self.maxNumber)
-        )
-        self.problem += exclusionConstraint <= self.maxNumber * self.maxNumber - 1
+        print("制約条件の設定が完了しました。")
 
     def solve(self):
         # 問題を解く
-        self.problem.solve()
-        if pulp.LpStatusOptimal == self.problem.status:
+        status = self.problem.solve()
+        if status == pulp.LpStatusOptimal:
             # 最適解が見つかった場合、解を取り出す
-            solution = [[0] * self.maxNumber for _ in range(self.maxNumber)]
-            for i in range(self.maxNumber):
-                for j in range(self.maxNumber):
-                    for k in range(self.maxNumber):
-                        if self.choices[i][j][k].varValue == 1:
-                            solution[i][j] = k + 1  # インデックスを戻す
+            solution = [[0 for _ in range(self.maxNumber)] for _ in range(self.maxNumber)]
+            for r in range(self.maxNumber):
+                for c in range(self.maxNumber):
+                    for v in range(1, self.maxNumber + 1):
+                        if pulp.value(self.choices[r][c][v]) == 1:
+                            solution[r][c] = v
             return solution
-        else:
-            # 最適解が見つからなかった場合
-            return None
+        return None
 
-    def adjustToUniqueSolution(self):
-        # 初期問題の定式化
-        self.formulateConstraints()
-        
-        # 解の探索を行い、複数解がある場合は調整する
-        while True:
-            solution = self.solve()
-            if solution is None:
-                break
+    def countOccurrences(self, solution):
+        # 解の出現回数をカウント
+        for r in range(self.maxNumber):
+            for c in range(self.maxNumber):
+                v = solution[r][c]
+                if v != 0:
+                    self.memoryArray[r][c][v-1] += 1
 
-            self.solutionCount += 1
-            # 解のカウント
-            for i in range(self.maxNumber):
-                for j in range(self.maxNumber):
-                    k = solution[i][j] - 1
-                    self.solutionArray[i][j][k] += 1
-            
-            # 現在の解を除外する制約を追加して次の解を探索
-            self.addExclusionConstraint(solution)
+    def findMinimumOccurrence(self):
+        # 最小出現回数の位置を見つける
+        minCount = float('inf')
+        minPos = None
+        for r in range(self.maxNumber):
+            for c in range(self.maxNumber):
+                if self.c1[r][c] == 0:  # 元々ヒントがない場所のみ考慮
+                    for v in range(self.maxNumber):
+                        if 0 < self.memoryArray[r][c][v] < minCount:
+                            minCount = self.memoryArray[r][c][v]
+                            minPos = (r, c, v+1)
+        return minPos
 
-        # 解の登場回数が1のものだけを残し、唯一解に調整
-        for i in range(self.maxNumber):
-            for j in range(self.maxNumber):
-                for k in range(self.maxNumber):
-                    if self.solutionArray[i][j][k] == 1:
-                        self.board[i][j] = k + 1
+    def addHint(self, pos):
+        # ヒントを追加
+        if pos:
+            r, c, v = pos
+            self.c1[r][c] = v
+            self.problem += self.choices[r][c][v] == 1
 
-        return self.board
+    def addExclusionConstraint(self, solution):
+        # 探索済み盤面パターンを除外する制約を追加
+        self.problem += pulp.lpSum(self.choices[r][c][solution[r][c]] 
+                                   for r in range(self.maxNumber) 
+                                   for c in range(self.maxNumber)) <= self.maxNumber * self.maxNumber - 1
 
     def generateUniqueSolution(self):
-        # 唯一解への調整
-        return self.adjustToUniqueSolution()
+        print("唯一解の生成を開始します。")
+        self.formulateConstraints()
+        
+        while True:
+            solutions = []
+            while True:
+                # 解を見つける
+                solution = self.solve()
+                if solution is None:
+                    break
+                solutions.append(solution)
+                self.countOccurrences(solution)
+                
+                # 探索済み盤面パターンを除外する制約を追加
+                self.addExclusionConstraint(solution)
+
+            if len(solutions) == 1:
+                print("唯一解が見つかりました。")
+                return solutions[0]
+            elif len(solutions) == 0:
+                print("解が見つかりませんでした。")
+                return None
+
+            # 最小出現回数の位置を見つけてヒントを追加
+            minPos = self.findMinimumOccurrence()
+            if minPos:
+                self.addHint(minPos)
+                print(f"ヒントを追加しました: {minPos}")
+                # 問題を初期化して再度制約を設定
+                self.problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
+                self.choices = pulp.LpVariable.dicts(
+                    "Choice", 
+                    (range(self.maxNumber), range(self.maxNumber), range(1, self.maxNumber + 1)),
+                    cat=pulp.LpBinary
+                )
+                self.formulateConstraints()
+            else:
+                print("これ以上ヒントを追加できません。")
+                return None
+
+        return None
+
+    def printBoard(self, board):
+        # 盤面を表示
+        for row in board:
+            print(" ".join(str(num) if num != 0 else "." for num in row))
+
+    def printMemoryArray(self):
+        # メモリ配列の内容を表示
+        for r in range(self.maxNumber):
+            for c in range(self.maxNumber):
+                print(f"位置 ({r}, {c}):")
+                for v in range(self.maxNumber):
+                    print(f"  {v+1}: {self.memoryArray[r][c][v]}")
+                print()
