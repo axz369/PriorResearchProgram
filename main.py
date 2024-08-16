@@ -69,6 +69,20 @@ def main():  # 数独パズルを生成, メインの関数
         print("\n唯一解が生成されました:")
         for row in uniqueSolution:
             print(" ".join(map(str, row)))
+
+        # 数字のまま保存
+        with open('numberOutput.json', 'w', encoding='utf-8') as f:
+            json.dump(uniqueSolution, f, ensure_ascii=False, indent=4)
+        print("numberOutput.jsonファイルが生成されました。")
+
+        # 数値から文字に変換
+        uniqueSolutionAsChars = converter.convertBack(uniqueSolution)
+
+        # JSONファイルとして保存
+        with open('output.json', 'w', encoding='utf-8') as f:
+            json.dump(uniqueSolutionAsChars, f, ensure_ascii=False, indent=4)
+
+        print("output.jsonファイルが生成されました。")
     else:
         print("\n唯一解が見つかりませんでした。")
 
