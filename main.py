@@ -6,8 +6,10 @@ from modules.ConvertToNumber import ConvertToNumber
 from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
 from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
+from modules.GenerateUniqueSolution import GenerateUniqueSolution
 from utility.displayBoards import displayBoards
-from utility.getUserChoice import getUserChoice 
+from utility.getUserChoice import getUserChoice
+
 
 def main():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
@@ -22,7 +24,6 @@ def main():  # 数独パズルを生成, メインの関数
     # 盤面の文字を数値に変換
     converter = ConvertToNumber(board, maxNumber)
     dataConvertedToNumbers = converter.getConvertedData()
-    print(dataConvertedToNumbers)
 
     # Validationクラスを使用して入力ファイルの正当性チェック
     validator = Validation(
@@ -35,7 +36,6 @@ def main():  # 数独パズルを生成, メインの関数
     symmetryAdder = AddHintToLineSymmetry(
         dataConvertedToNumbers['boardConvertedToNumber'])
     symmetricBoards = symmetryAdder.getSymmetricBoards()  # 4つの対称盤面を取得
-    print(symmetricBoards)
 
     # ヒント数の統一処理
     hintUnifier = UnifiedNumberOfHints(symmetricBoards, targetHintCount=28)
@@ -59,7 +59,22 @@ def main():  # 数独パズルを生成, メインの関数
     selectedBoardName = symmetryNames[userChoice]
 
     print(f"\n選ばれた盤面: {selectedBoardName}")
-    
+
+    # 唯一解の生成
+    uniqueSolutionGenerator = GenerateUniqueSolution(selectedBoard, maxNumber)
+    uniqueSolution = uniqueSolutionGenerator.generateUniqueSolution()
+
+    # 唯一解が見つかったかどうかを確認
+    if uniqueSolution is not None:
+        print("\n唯一解が生成されました:")
+        for row in uniqueSolution:
+            print(" ".join(map(str, row)))
+    else:
+        print("\n唯一解が見つかりませんでした。")
+
+    return uniqueSolution is not None
+
+
 if __name__ == "__main__":
     startTime = time.time()
     isSolved = main()
