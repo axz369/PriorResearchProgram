@@ -9,6 +9,7 @@ from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
 from modules.GenerateUniqueSolution import GenerateUniqueSolution
 from utility.displayBoards import displayBoards
 from utility.getUserChoice import getUserChoice
+from utility.generateSolutionBoard import generateSolutionBoard
 
 
 def main():  # 数独パズルを生成, メインの関数
@@ -31,6 +32,17 @@ def main():  # 数独パズルを生成, メインの関数
     if not validator.check():
         print("バリデーション失敗")
         return False
+
+    # generateSolutionBoard関数を使用して解盤面Aを取得
+    boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]  # 元の盤面をコピー
+    isSolutionGenerated = generateSolutionBoard(boardA, maxNumber)  # 解盤面Aを生成
+
+    if not isSolutionGenerated:
+        print("解盤面Aの生成に失敗しました。")
+        return False
+    else:
+        print("解盤面Aが生成されました")
+        print(boardA)
 
     # 線対称にヒントを追加
     symmetryAdder = AddHintToLineSymmetry(
