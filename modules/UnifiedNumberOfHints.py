@@ -1,5 +1,6 @@
 import random
 
+
 class UnifiedNumberOfHints:
     def __init__(self, boards, boardA, targetHintCount=28):
         self.boards = boards
@@ -33,32 +34,20 @@ class UnifiedNumberOfHints:
                      for c in range(self.size) if board[r][c] == 0]
         random.shuffle(positions)
 
-        last_added_position = None  # 直前に追加したヒント位置を保持する
+        # 最後に追加したヒント位置
+        lastAddedPosition = None
 
         # 指定された数だけヒントを追加
         for i in range(hintsToAdd):
             if not positions:
                 break
 
-            if i % 2 == 0:
-                # 奇数回目: ランダムな位置にヒントを追加
+            if i % 2 == 0:# 奇数回目: ランダムな位置にヒントを追加
                 r, c = positions.pop()
                 board[r][c] = self.boardA[r][c]
-                last_added_position = (r, c)
-            else:
-                # 偶数回目: 直前の位置と対称な位置にヒントを追加
-                if last_added_position:
-                    lr, lc = last_added_position
-                    sym_r = self.size - 1 - lr
-                    sym_c = self.size - 1 - lc
-                    if board[sym_r][sym_c] == 0:
-                        board[sym_r][sym_c] = self.boardA[sym_r][sym_c]
-                    else:
-                        # 対称位置が埋まっている場合、新たにランダムな位置にヒントを追加
-                        r, c = positions.pop()
-                        board[r][c] = self.boardA[r][c]
-                else:
-                    # 直前に追加した位置がない場合（安全のための処理）
-                    r, c = positions.pop()
-                    board[r][c] = self.boardA[r][c]
-
+                lastAddedPosition = (r,c)
+            else:# 偶数回目: 直前の位置と対称な位置にヒントを追加
+                lr, lc = lastAddedPosition
+                symR = self.size - 1 - lr
+                symC = self.size - 1 - lc
+                board[symR][symC] = self.boardA[symR][symC]
