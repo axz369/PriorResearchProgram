@@ -34,7 +34,9 @@ def main():  # 数独パズルを生成, メインの関数
         return False
 
     # generateSolutionBoard関数を使用して解盤面Aを取得
-    boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]  # 元の盤面をコピー
+    boardA = [row[:]
+              # 元の盤面をコピー
+              for row in dataConvertedToNumbers['boardConvertedToNumber']]
     isSolutionGenerated = generateSolutionBoard(boardA, maxNumber)  # 解盤面Aを生成
 
     if not isSolutionGenerated:
@@ -45,13 +47,15 @@ def main():  # 数独パズルを生成, メインの関数
         print(boardA)
 
     # 対称性に基づいたヒントを追加するクラスを作成
-    symmetryAdder = AddHintToLineSymmetry(dataConvertedToNumbers['boardConvertedToNumber'], boardA)
+    symmetryAdder = AddHintToLineSymmetry(
+        dataConvertedToNumbers['boardConvertedToNumber'], boardA)
 
     # 4つの対称盤面を取得
     symmetricBoards = symmetryAdder.getSymmetricBoards()
 
     # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(symmetricBoards, targetHintCount=28)
+    hintUnifier = UnifiedNumberOfHints(
+        symmetricBoards, boardA, targetHintCount=80)
     unifiedBoards = hintUnifier.unifyHints()
 
     # 数値から元の文字盤面に戻す

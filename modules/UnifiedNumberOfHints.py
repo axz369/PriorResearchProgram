@@ -1,14 +1,14 @@
 import random
 
-
 class UnifiedNumberOfHints:
-    def __init__(self, boards, targetHintCount=28):
+    def __init__(self, boards, boardA, targetHintCount=28):
         self.boards = boards
+        self.boardA = boardA
         self.size = len(boards[0])
         self.targetHintCount = targetHintCount
 
     def countHints(self, board):
-        # 各盤面のヒント数をカウント,0以外をカウント
+        # 各盤面のヒント数をカウント, 0以外をカウント
         return self.size * self.size - sum(row.count(0) for row in board)
 
     def unifyHints(self):
@@ -38,24 +38,5 @@ class UnifiedNumberOfHints:
             if not positions:
                 break
             r, c = positions.pop()
-            while True:
-                value = random.randint(1, self.size)
-                if self.canPlaceHint(board, r, c, value):
-                    board[r][c] = value
-                    break
-
-    def canPlaceHint(self, board, row, col, value):
-        # ヒントが行、列、ブロック内で重複しないかを確認
-        for i in range(self.size):
-            if board[row][i] == value or board[i][col] == value:
-                return False
-
-        subblockSize = int(self.size ** 0.5)
-        startRow = (row // subblockSize) * subblockSize
-        startCol = (col // subblockSize) * subblockSize
-        for r in range(startRow, startRow + subblockSize):
-            for c in range(startCol, startCol + subblockSize):
-                if board[r][c] == value:
-                    return False
-
-        return True
+            # 解盤面Aの値を使ってヒントを追加
+            board[r][c] = self.boardA[r][c]
