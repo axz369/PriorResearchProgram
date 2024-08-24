@@ -1,5 +1,5 @@
-import random
-from modules.CanBePlaced import CanBePlaced
+from utility.generateSolutionBoard import generateSolutionBoard
+
 
 class Validation:
     def __init__(self, charToNumberMap, board, maxNumber):
@@ -60,31 +60,4 @@ class Validation:
 
     def checkSolutionExists(self):
         solutionBoard = [row[:] for row in self.board]  # boardのコピーを作成
-        return self.generateSolutionBoard(solutionBoard, 0, 0)
-
-    def generateSolutionBoard(self, solutionBoard, currentPosition, depth):
-        if depth > self.MAX_RECURSION_DEPTH:
-            return False  # 再帰の深さが最大値を超えたら False を返す
-
-        canBePlacedChecker = CanBePlaced(solutionBoard, self.maxNumber)
-
-        if currentPosition == self.maxNumber * self.maxNumber:
-            return True
-
-        newPosition = currentPosition
-        while newPosition < self.maxNumber * self.maxNumber and solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] != 0:
-            newPosition += 1
-
-        if newPosition == self.maxNumber * self.maxNumber:
-            return True
-
-        randomNumbers = random.sample(range(1, self.maxNumber + 1), self.maxNumber)
-
-        for x in randomNumbers:
-            if canBePlacedChecker.check(newPosition, x):
-                solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] = x
-                if self.generateSolutionBoard(solutionBoard, newPosition + 1, depth + 1):
-                    return True
-                solutionBoard[newPosition // self.maxNumber][newPosition % self.maxNumber] = 0
-
-        return False
+        return generateSolutionBoard(solutionBoard, 0, 0)
