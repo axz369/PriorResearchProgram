@@ -55,7 +55,7 @@ def main():  # 数独パズルを生成, メインの関数
 
     # ヒント数の統一処理
     hintUnifier = UnifiedNumberOfHints(
-        symmetricBoards, boardA, targetHintCount=80)
+        symmetricBoards, boardA, targetHintCount=28)
     unifiedBoards = hintUnifier.unifyHints()
 
     # 数値から元の文字盤面に戻す
