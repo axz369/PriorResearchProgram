@@ -44,10 +44,11 @@ def main():  # 数独パズルを生成, メインの関数
         print("解盤面Aが生成されました")
         print(boardA)
 
-    # 線対称にヒントを追加
-    symmetryAdder = AddHintToLineSymmetry(
-        dataConvertedToNumbers['boardConvertedToNumber'])
-    symmetricBoards = symmetryAdder.getSymmetricBoards()  # 4つの対称盤面を取得
+    # 対称性に基づいたヒントを追加するクラスを作成
+    symmetryAdder = AddHintToLineSymmetry(dataConvertedToNumbers['boardConvertedToNumber'], boardA)
+
+    # 4つの対称盤面を取得
+    symmetricBoards = symmetryAdder.getSymmetricBoards()
 
     # ヒント数の統一処理
     hintUnifier = UnifiedNumberOfHints(symmetricBoards, targetHintCount=28)
