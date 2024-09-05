@@ -11,6 +11,20 @@ from utility.getUserChoice import getUserChoice
 from utility.generateSolutionBoard import generateSolutionBoard
 
 
+
+#唯一解生成
+def generateUniqueSolution(board, boardName):
+    print("唯一解生成開始")
+
+    print(f"選ばれた盤面 : {boardName}")
+    print(board)
+
+    print("唯一解生成終了")
+
+
+
+
+
 def main():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
     with open('input.json', 'r') as file:
@@ -74,7 +88,10 @@ def main():  # 数独パズルを生成, メインの関数
     selectedBoard = unifiedBoards[userChoice]
     selectedBoardName = symmetryNames[userChoice]
 
-    print(f"\n選ばれた盤面: {selectedBoardName}")
+
+    generateUniqueSolution(selectedBoard,selectedBoardName)
+
+    
 
     # 唯一解の生成
 
