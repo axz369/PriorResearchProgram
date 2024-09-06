@@ -90,12 +90,16 @@ def generateUniqueSolution(board, boardName):
             problem += pulp.lpSum(isValueInCell[i][j][solution[i][j]]
                                   for i in range(size) for j in range(size)) <= size * size - 1
 
-            print(f"解 {len(solution_boards)} が見つかりました。")
+            print(f"\n解 {len(solution_boards)} が見つかりました:")
+            # 探索した解盤面を表示して確認する
+            print_board(solution)
         else:
             print("これ以上の解は見つかりませんでした。")
             break  # 解が見つからない場合はループを抜ける
 
     print(f"生成された解の数: {len(solution_boards)}")
+
+    # 投票配列を表示して確認
     print("111~999の連続した配列の内容:")
     for i in range(size):
         for j in range(size):
@@ -105,6 +109,20 @@ def generateUniqueSolution(board, boardName):
 
     print("唯一解生成終了")
     return solution_boards, occurrence_count
+
+
+# 唯一解生成で生成した一つ一つの解盤面を表示するための関数
+def print_board(board):
+    size = len(board)
+    print("+" + "---+" * size)
+    for i, row in enumerate(board):
+        print("|", end="")
+        for j, val in enumerate(row):
+            print(f" {val if val != 0 else ' '} ", end="|")
+        print()
+        if i < size - 1:
+            print("+" + "---+" * size)
+    print("+" + "---+" * size)
 
 
 def main():  # 数独パズルを生成, メインの関数
