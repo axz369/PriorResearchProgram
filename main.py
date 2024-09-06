@@ -23,13 +23,13 @@ def generateUniqueSolution(board, boardName):
 
     # 解盤面を管理する配列
     solution_boards = []
+
     # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
     occurrence_count = [[[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
 
-    # 問題の初期化
     problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
 
-    # バイナリ変数の作成
+    # 決定変数の作成
     isValueInCell = pulp.LpVariable.dicts("IsValueInCell",
                                           (range(size), range(size), range(1, size + 1)),
                                           cat='Binary')
@@ -65,23 +65,19 @@ def generateUniqueSolution(board, boardName):
             if board[i][j] != 0:
                 problem += isValueInCell[i][j][board[i][j]] == 1
 
-    # 生成する回数に達するまで解盤面生成を行う
     while len(solution_boards) < max_solutions:
         # 問題を解く
         status = problem.solve()
 
-        # pulpの結果から数独の盤面を構築
+        # 解の取り出し
         if pulp.LpStatus[status] == 'Optimal':
             solution = [[0 for _ in range(size)] for _ in range(size)]
             for i in range(size):
                 for j in range(size):
                     for k in range(1, size + 1):
-                        # 値が1(対称の値が入っている)ならi行j列にの値kを
-                        # solution(直前のコードブロックで生成された数独の1つの解盤面を入れる配列)に記録
                         if pulp.value(isValueInCell[i][j][k]) == 1:
                             solution[i][j] = k
 
-            # 解盤面も保存
             solution_boards.append(solution)
 
             # 111~999の連続した配列に情報を格納
@@ -90,10 +86,13 @@ def generateUniqueSolution(board, boardName):
                     value = solution[i][j]
                     occurrence_count[i][j][value - 1] += 1
 
-            # 今回探索した解を除外する制約を追加
+            # 今回の解を除外する制約を追加
             problem += pulp.lpSum(isValueInCell[i][j][solution[i][j]]
                                   for i in range(size) for j in range(size)) <= size * size - 1
+
+            print(f"解 {len(solution_boards)} が見つかりました。")
         else:
+            print("これ以上の解は見つかりませんでした。")
             break  # 解が見つからない場合はループを抜ける
 
     print(f"生成された解の数: {len(solution_boards)}")
