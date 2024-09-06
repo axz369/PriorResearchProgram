@@ -12,108 +12,100 @@ from utility.getUserChoice import getUserChoice
 from utility.generateSolutionBoard import generateSolutionBoard
 
 
-#解盤面をひとつだけ生成する関数
-def generateOneSolution(board):
-    print("一つの解盤面生成開始")
-    
-    size = len(board)
-    problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
-    
-    # 決定変数の作成
-    isValueInCell = pulp.LpVariable.dicts("IsValueInCell", 
-                                          (range(size), range(size), range(1, size + 1)), 
-                                          cat='Binary')
-    
-    # 制約条件の追加
-    # 1. 各マスには1つの数字のみが入る
-    for i in range(size):
-        for j in range(size):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for k in range(1, size + 1)]) == 1
-    
-    # 2. 各行には1から9の数字が1つずつ入る
-    for i in range(size):
-        for k in range(1, size + 1):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for j in range(size)]) == 1
-    
-    # 3. 各列には1から9の数字が1つずつ入る
-    for j in range(size):
-        for k in range(1, size + 1):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for i in range(size)]) == 1
-    
-    # 4. 各3x3ブロックには1から9の数字が1つずつ入る
-    block_size = int(size ** 0.5)
-    for bi in range(block_size):
-        for bj in range(block_size):
-            for k in range(1, size + 1):
-                problem += pulp.lpSum([isValueInCell[i][j][k] 
-                                       for i in range(bi*block_size, (bi+1)*block_size) 
-                                       for j in range(bj*block_size, (bj+1)*block_size)]) == 1
-    
-    # 5. 初期値（ヒント）の設定
-    for i in range(size):
-        for j in range(size):
-            if board[i][j] != 0: #値が入っているセルは初期値として固定
-                problem += isValueInCell[i][j][board[i][j]] == 1
-    
-    # 問題を解く
-    problem.solve()
-    
-    # 整数計画問題を解いた後，その結果から数独の解を取り出す処理
-    if pulp.LpStatus[problem.status] == 'Optimal':
-        solution = [[0 for _ in range(size)] for _ in range(size)]
-        for i in range(size):
-            for j in range(size):
-                for k in range(1, size + 1):
-                    if pulp.value(isValueInCell[i][j][k]) == 1:
-                        solution[i][j] = k
-        print("一つの解盤面生成終了")
-        return solution
-    else:
-        print("解が見つかりませんでした")
-        return None
-
-
-
-
-
-
-# 唯一解を生成するための関数
 def generateUniqueSolution(board, boardName):
     print("唯一解生成開始")
     print(f"選ばれた盤面 : {boardName}")
     for row in board:
         print(row)
-    
-    #解盤面をひとつだけ生成
-    solution = generateOneSolution(board)
-    
-    #生成された盤面の表示
-    if solution:
-        print("生成された解盤面:")
-        for row in solution:
-            print(row)
-    else:
-        print("解が見つかりませんでした")
-    
+
+    size = len(board)
+    max_solutions = 10  # 生成する解の最大数
+
+    # 解盤面を管理する配列
+    solution_boards = []
+    # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
+    occurrence_count = [[[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
+
+    # 問題の初期化
+    problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
+
+    # バイナリ変数の作成
+    isValueInCell = pulp.LpVariable.dicts("IsValueInCell",
+                                          (range(size), range(size), range(1, size + 1)),
+                                          cat='Binary')
+
+    # 制約条件の追加
+    # 1. 各マスには1つの数字のみが入る
+    for i in range(size):
+        for j in range(size):
+            problem += pulp.lpSum([isValueInCell[i][j][k] for k in range(1, size + 1)]) == 1
+
+    # 2. 各行には1から9の数字が1つずつ入る
+    for i in range(size):
+        for k in range(1, size + 1):
+            problem += pulp.lpSum([isValueInCell[i][j][k] for j in range(size)]) == 1
+
+    # 3. 各列には1から9の数字が1つずつ入る
+    for j in range(size):
+        for k in range(1, size + 1):
+            problem += pulp.lpSum([isValueInCell[i][j][k] for i in range(size)]) == 1
+
+    # 4. 各3x3ブロックには1から9の数字が1つずつ入る
+    block_size = int(size ** 0.5)
+    for bi in range(block_size):
+        for bj in range(block_size):
+            for k in range(1, size + 1):
+                problem += pulp.lpSum([isValueInCell[i][j][k]
+                                       for i in range(bi * block_size, (bi + 1) * block_size)
+                                       for j in range(bj * block_size, (bj + 1) * block_size)]) == 1
+
+    # 5. 初期値（ヒント）の設定
+    for i in range(size):
+        for j in range(size):
+            if board[i][j] != 0:
+                problem += isValueInCell[i][j][board[i][j]] == 1
+
+    # 生成する回数に達するまで解盤面生成を行う
+    while len(solution_boards) < max_solutions:
+        # 問題を解く
+        status = problem.solve()
+
+        # pulpの結果から数独の盤面を構築
+        if pulp.LpStatus[status] == 'Optimal':
+            solution = [[0 for _ in range(size)] for _ in range(size)]
+            for i in range(size):
+                for j in range(size):
+                    for k in range(1, size + 1):
+                        # 値が1(対称の値が入っている)ならi行j列にの値kを
+                        # solution(直前のコードブロックで生成された数独の1つの解盤面を入れる配列)に記録
+                        if pulp.value(isValueInCell[i][j][k]) == 1:
+                            solution[i][j] = k
+
+            # 解盤面も保存
+            solution_boards.append(solution)
+
+            # 111~999の連続した配列に情報を格納
+            for i in range(size):
+                for j in range(size):
+                    value = solution[i][j]
+                    occurrence_count[i][j][value - 1] += 1
+
+            # 今回探索した解を除外する制約を追加
+            problem += pulp.lpSum(isValueInCell[i][j][solution[i][j]]
+                                  for i in range(size) for j in range(size)) <= size * size - 1
+        else:
+            break  # 解が見つからない場合はループを抜ける
+
+    print(f"生成された解の数: {len(solution_boards)}")
+    print("111~999の連続した配列の内容:")
+    for i in range(size):
+        for j in range(size):
+            print(f"位置 ({i + 1}, {j + 1}):")
+            for k in range(size):
+                print(f"  {k + 1}: {occurrence_count[i][j][k]}")
+
     print("唯一解生成終了")
-    return solution
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return solution_boards, occurrence_count
 
 
 def main():  # 数独パズルを生成, メインの関数
@@ -179,15 +171,9 @@ def main():  # 数独パズルを生成, メインの関数
     selectedBoard = unifiedBoards[userChoice]
     selectedBoardName = symmetryNames[userChoice]
 
-
-    generateUniqueSolution(selectedBoard,selectedBoardName)
-
-    
+    generateUniqueSolution(selectedBoard, selectedBoardName)
 
     # 唯一解の生成
-
-
-    
 
 
 if __name__ == "__main__":
