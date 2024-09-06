@@ -19,10 +19,13 @@ def generateUniqueSolution(board, boardName):
         print(row)
 
     size = len(board)
-    max_solutions = 10  # 生成する解の最大数
+    max_solutions = 100  # 生成する解の最大数
 
     # 解盤面を管理する配列
     solution_boards = []
+
+    # 各解盤面に対する制約を保持するリスト
+    solution_constraints = []
 
     # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
     occurrence_count = [[[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
@@ -86,16 +89,21 @@ def generateUniqueSolution(board, boardName):
                     value = solution[i][j]
                     occurrence_count[i][j][value - 1] += 1
 
-            # 今回の解を除外する制約を追加
-            problem += pulp.lpSum(isValueInCell[i][j][solution[i][j]]
-                                  for i in range(size) for j in range(size)) <= size * size - 1
+             # 新しい解を除外する制約を作成
+            new_constraint = pulp.LpAffineExpression(
+                [(isValueInCell[i][j][solution[i][j]], 1) for i in range(size) for j in range(size)]
+            )
+            solution_constraints.append(new_constraint)
+
+            # 全ての既存の解に対する制約を追加
+            for constraint in solution_constraints[:-1]:  # 最後に追加したものを除く
+                problem += constraint <= 80  # 80マスまでの一致を許容
 
             print(f"\n解 {len(solution_boards)} が見つかりました:")
-            # 探索した解盤面を表示して確認する
             print_board(solution)
         else:
             print("これ以上の解は見つかりませんでした。")
-            break  # 解が見つからない場合はループを抜ける
+            break
 
     print(f"生成された解の数: {len(solution_boards)}")
 
@@ -131,7 +139,7 @@ def main():  # 数独パズルを生成, メインの関数
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input7"]
+    sudokuProblem = data["inputs"]["input1"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
