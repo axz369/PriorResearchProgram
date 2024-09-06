@@ -131,7 +131,7 @@ def main():  # 数独パズルを生成, メインの関数
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input1"]
+    sudokuProblem = data["inputs"]["input7"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
