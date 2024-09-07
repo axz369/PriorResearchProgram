@@ -24,34 +24,36 @@ def generateUniqueSolution(board, boardName):
     # 解盤面を管理する配列
     solution_boards = []
 
-    # 各解盤面に対する制約を保持するリスト
-    solution_constraints = []
-
     # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
-    occurrence_count = [[[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
+    occurrence_count = [
+        [[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
 
     problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
 
     # 決定変数の作成
     isValueInCell = pulp.LpVariable.dicts("IsValueInCell",
-                                          (range(size), range(size), range(1, size + 1)),
+                                          (range(size), range(size),
+                                           range(1, size + 1)),
                                           cat='Binary')
 
     # 制約条件の追加
     # 1. 各マスには1つの数字のみが入る
     for i in range(size):
         for j in range(size):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for k in range(1, size + 1)]) == 1
+            problem += pulp.lpSum([isValueInCell[i][j][k]
+                                  for k in range(1, size + 1)]) == 1
 
     # 2. 各行には1から9の数字が1つずつ入る
     for i in range(size):
         for k in range(1, size + 1):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for j in range(size)]) == 1
+            problem += pulp.lpSum([isValueInCell[i][j][k]
+                                  for j in range(size)]) == 1
 
     # 3. 各列には1から9の数字が1つずつ入る
     for j in range(size):
         for k in range(1, size + 1):
-            problem += pulp.lpSum([isValueInCell[i][j][k] for i in range(size)]) == 1
+            problem += pulp.lpSum([isValueInCell[i][j][k]
+                                  for i in range(size)]) == 1
 
     # 4. 各3x3ブロックには1から9の数字が1つずつ入る
     block_size = int(size ** 0.5)
@@ -89,15 +91,13 @@ def generateUniqueSolution(board, boardName):
                     value = solution[i][j]
                     occurrence_count[i][j][value - 1] += 1
 
-             # 新しい解を除外する制約を作成
+            # 新しい解を除外する制約を作成
             new_constraint = pulp.LpAffineExpression(
-                [(isValueInCell[i][j][solution[i][j]], 1) for i in range(size) for j in range(size)]
+                [(isValueInCell[i][j][solution[i][j]], 1)
+                 for i in range(size) for j in range(size)]
             )
-            solution_constraints.append(new_constraint)
-
-            # 全ての既存の解に対する制約を追加
-            for constraint in solution_constraints[:-1]:  # 最後に追加したものを除く
-                problem += constraint <= 80  # 80マスまでの一致を許容
+            # 新しい制約を問題に追加
+            problem += new_constraint <= 80  # 80マスまでの一致を許容
 
             print(f"\n解 {len(solution_boards)} が見つかりました:")
             print_board(solution)
