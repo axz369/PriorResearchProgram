@@ -19,7 +19,7 @@ def generateUniqueSolution(board, boardName):
         print(row)
 
     size = len(board)
-    max_solutions = 100  # 生成する解の最大数
+    max_solutions = 500  # 生成する解の最大数
 
     # 解盤面を管理する配列
     solution_boards = []
@@ -135,11 +135,11 @@ def print_board(board):
 
 def main():  # 数独パズルを生成, メインの関数
     # JSONファイルを読み込む
-    with open('input.json', 'r') as file:
+    with open('input9.json', 'r') as file:
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input1"]
+    sudokuProblem = data["inputs"]["input3"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
@@ -196,14 +196,15 @@ def main():  # 数独パズルを生成, メインの関数
     selectedBoard = unifiedBoards[userChoice]
     selectedBoardName = symmetryNames[userChoice]
 
-    generateUniqueSolution(selectedBoard, selectedBoardName)
-
     # 唯一解の生成
+    startTime = time.time()
+    generateUniqueSolution(selectedBoard, selectedBoardName)
+    endTime = time.time()
+
+    generationTime = endTime - startTime
+    print(f"生成時間: {generationTime:.2f}秒")
 
 
 if __name__ == "__main__":
-    startTime = time.time()
+
     isSolved = main()
-    endTime = time.time()
-    generationTime = endTime - startTime
-    print(f"生成時間: {generationTime:.2f}秒")
