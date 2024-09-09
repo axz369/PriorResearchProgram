@@ -24,8 +24,8 @@ def generateUniqueSolution(board, boardName):
     max_solutions = 100  # 生成する解の最大数
 
     while True:  # 外部ループ:内部ループ内で解盤面が一つしか見つからなくなったら終了
-        # 解盤面を管理する配列
-        solution_boards = []
+        solution_count = 0  # 解の数をカウント
+        last_solution = None  # 最後に見つかった解を保持
 
         # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
         occurrence_count = [
@@ -74,7 +74,7 @@ def generateUniqueSolution(board, boardName):
                     problem += isValueInCell[i][j][board[i][j]] == 1
 
         # 内部ループ
-        while len(solution_boards) < max_solutions:
+        while solution_count < max_solutions:
             current_time = time.time()
             if current_time - start_time > 1800:  # 30分（1800秒）を超えた場合
                 print("30分を超えたため処理を終了します。")
@@ -85,7 +85,7 @@ def generateUniqueSolution(board, boardName):
 
             # 新しい解盤面が見つかったら
             if pulp.LpStatus[status] == 'Optimal':
-                # 数理最適化の結果から解盤面を取り出して配列に保存
+                solution_count += 1
                 solution = [[0 for _ in range(size)] for _ in range(size)]
                 for i in range(size):
                     for j in range(size):
@@ -93,7 +93,7 @@ def generateUniqueSolution(board, boardName):
                             if pulp.value(isValueInCell[i][j][k]) == 1:
                                 solution[i][j] = k
 
-                solution_boards.append(solution)
+                last_solution = solution  # 最後の解を保持
 
                 # 111~999の連続した配列に情報を格納
                 for i in range(size):
@@ -109,19 +109,19 @@ def generateUniqueSolution(board, boardName):
                 # 新しい制約を問題に追加
                 problem += new_constraint <= 80  # 80マスまでの一致を許容
 
-                print(f"\n解 {len(solution_boards)} が見つかりました:")
+                print(f"\n解 {solution_count} が見つかりました:")
                 print_board(solution)
             else:
                 print("これ以上の解は見つかりませんでした。")
                 break
 
-        print(f"生成された解の数: {len(solution_boards)}")
+        print(f"生成された解の数: {solution_count}")
 
         # 解盤面が一つしか見つからなかった(唯一解が確定)
-        if len(solution_boards) == 1:
+        if solution_count == 1:
             print("唯一解が見つかりました。")
             print("唯一解生成終了")
-            return solution_boards[0]
+            return last_solution
 
         # 最小出現回数のマスを見つける
         min_count = float('inf')
