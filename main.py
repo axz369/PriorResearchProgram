@@ -80,8 +80,8 @@ def generateUniqueSolution(board, boardName):
                 print("30分を超えたため処理を終了します。")
                 return None
 
-            # 問題を解く
-            status = problem.solve()
+            # 問題を解く. ()の中はソルバーの出力off設定
+            status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
 
             # 新しい解盤面が見つかったら
             if pulp.LpStatus[status] == 'Optimal':
@@ -112,7 +112,7 @@ def generateUniqueSolution(board, boardName):
                 print(f"\n解 {solution_count} が見つかりました:")
                 print_board(solution)
             else:
-                print("これ以上の解は見つかりませんでした。")
+                print("全ての解盤面を生成しました．")
                 break
 
         print(f"生成された解の数: {solution_count}")
