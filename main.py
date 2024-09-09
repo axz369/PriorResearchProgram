@@ -13,6 +13,8 @@ from utility.generateSolutionBoard import generateSolutionBoard
 
 
 def generateUniqueSolution(board, boardName):
+    start_time = time.time()
+
     print("唯一解生成開始")
     print(f"選ばれた盤面 : {boardName}")
     for row in board:
@@ -71,6 +73,12 @@ def generateUniqueSolution(board, boardName):
                 problem += isValueInCell[i][j][board[i][j]] == 1
 
     while len(solution_boards) < max_solutions:
+
+        current_time = time.time()
+        if current_time - start_time > 1800:  # 30分（1800秒）を超えた場合
+            print("30分を超えたため処理を終了します。")
+            break
+
         # 問題を解く
         status = problem.solve()
 
