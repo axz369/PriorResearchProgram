@@ -1,4 +1,5 @@
 import random
+from utility.printBoard import printBoard
 
 
 class UnifiedNumberOfHints:
@@ -24,6 +25,7 @@ class UnifiedNumberOfHints:
         for i, board in enumerate(self.boards):
             currentHintCount = self.countHints(board)
             if currentHintCount < targetHints:
+                print(f"\n盤面 {i + 1} のヒント追加処理開始:")
                 self.addHints(board, targetHints - currentHintCount)
 
         return self.boards
@@ -42,12 +44,19 @@ class UnifiedNumberOfHints:
             if not positions:
                 break
 
-            if i % 2 == 0:# 奇数回目: ランダムな位置にヒントを追加
+            if i % 2 == 0:  # 偶数回目: ランダムな位置にヒントを追加
                 r, c = positions.pop()
                 board[r][c] = self.boardA[r][c]
-                lastAddedPosition = (r,c)
-            else:# 偶数回目: 直前の位置と対称な位置にヒントを追加
+                lastAddedPosition = (r, c)
+                print(f"偶数回目: 位置 ({r + 1}, {c + 1}) にヒント {board[r][c]} を追加")
+            else:  # 奇数回目: 直前の位置と対称な位置にヒントを追加
                 lr, lc = lastAddedPosition
                 symR = self.size - 1 - lr
                 symC = self.size - 1 - lc
                 board[symR][symC] = self.boardA[symR][symC]
+                print(f"奇数回目: 位置 ({symR + 1}, {symC + 1}) にヒント {board[symR][symC]} を追加")
+
+            print("更新後の盤面:")
+            printBoard(board)
+            print(f"現在のヒント数: {self.countHints(board)}")
+            print("--------------------")
