@@ -166,11 +166,11 @@ def print_board(board):
 
 def main():
     # JSONファイルを読み込む
-    with open('input9.json', 'r') as file:
+    with open('input.json', 'r') as file:
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input3"]
+    sudokuProblem = data["inputs"]["input1"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
