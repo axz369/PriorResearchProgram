@@ -7,7 +7,6 @@ from modules.ConvertToNumber import ConvertToNumber
 from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
 from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
-from utility.displayBoards import displayBoards
 from utility.getUserChoice import getUserChoice
 from utility.generateSolutionBoard import generateSolutionBoard
 
