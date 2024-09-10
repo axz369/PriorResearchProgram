@@ -153,7 +153,7 @@ def generateUniqueSolution(board, boardName):
 
 def main():
     # JSONファイルを読み込む
-    with open('input.json', 'r') as file:
+    with open('input9.json', 'r') as file:
         data = json.load(file)
 
     # 使用する数独の問題を選択
@@ -194,36 +194,40 @@ def main():
     # 4つの対称盤面を取得
     symmetricBoards = symmetryAdder.getSymmetricBoards()
 
+    # 対称性タイプのリストを定義
+    symmetryTypes = ["horizontal", "vertical", "diagonal_up", "diagonal_down"]
+
     # 対称軸に追加した直後の盤面を表示
-    symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
-                     "diagonalSymmetry", "antiDiagonalSymmetry"]
     print("******************************************")
     print("対称軸に追加した直後の盤面:")
     print("******************************************")
 
-    for name, board in zip(symmetryNames, symmetricBoards):
-        print(f"\n{name}:")
+    for symmetry_type, board in zip(symmetryTypes, symmetricBoards):
+        print(f"\n{symmetry_type}Symmetry:")
         printBoard(converter.convertBack(board))
 
     # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(
-        symmetricBoards, boardA, targetHintCount=28)
-    unifiedBoards = hintUnifier.unifyHints()
+    unifiedBoards = []
+    for symmetry_type, board in zip(symmetryTypes, symmetricBoards):
+        hintUnifier = UnifiedNumberOfHints(
+            [board], boardA, targetHintCount=28, symmetry_type=symmetry_type)
+        unifiedBoard = hintUnifier.unifyHints()[0]
+        unifiedBoards.append(unifiedBoard)
 
     # ヒント数統一後の盤面を表示
     print("\n******************************************")
     print("ヒント数統一後の盤面:")
     print("******************************************")
-    for name, board in zip(symmetryNames, unifiedBoards):
-        print(f"\n{name}:")
+    for symmetry_type, board in zip(symmetryTypes, unifiedBoards):
+        print(f"\n{symmetry_type}Symmetry:")
         printBoard(converter.convertBack(board))
 
     # 盤面を表示してユーザに選択させる
-    userChoice = getUserChoice(symmetryNames)
+    userChoice = getUserChoice([f"{s}Symmetry" for s in symmetryTypes])
 
     # 選択された盤面を取得
     selectedBoard = unifiedBoards[userChoice]
-    selectedBoardName = symmetryNames[userChoice]
+    selectedBoardName = f"{symmetryTypes[userChoice]}Symmetry"
 
     # 唯一解の生成
     startTime = time.time()
