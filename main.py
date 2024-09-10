@@ -21,7 +21,7 @@ def generateUniqueSolution(board, boardName):
         print(row)
 
     size = len(board)
-    max_solutions = 100  # 生成する解の最大数
+    max_solutions = 30  # 生成する解の最大数
 
     while True:  # 外部ループ:内部ループ内で解盤面が一つしか見つからなくなったら終了
         solution_count = 0  # 解の数をカウント
@@ -157,7 +157,7 @@ def print_board(board):
     for i, row in enumerate(board):
         print("|", end="")
         for j, val in enumerate(row):
-            print(f" {val if val != 0 else ' '} ", end="|")
+            print(f" {val if val != 0 and val != '0' else ' '} ", end="|")
         print()
         if i < size - 1:
             print("+" + "---+" * size)
@@ -173,6 +173,10 @@ def main():
     sudokuProblem = data["inputs"]["input1"]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
+
+    # 入力盤面を表示
+    print("入力盤面:")
+    print_board(board)
 
     # 盤面の文字を数値に変換
     converter = ConvertToNumber(board, maxNumber)
@@ -194,7 +198,7 @@ def main():
         return False
     else:
         print("解盤面Aが生成されました")
-        print(boardA)
+        print_board(converter.convertBack(boardA))
 
     # 対称性に基づいたヒントを追加するクラスを作成
     symmetryAdder = AddHintToLineSymmetry(
@@ -203,22 +207,31 @@ def main():
     # 4つの対称盤面を取得
     symmetricBoards = symmetryAdder.getSymmetricBoards()
 
+    # 対称軸に追加した直後の盤面を表示
+    symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
+                     "diagonalSymmetry", "antiDiagonalSymmetry"]
+    print("******************************************")
+    print("対称軸に追加した直後の盤面:")
+    print("******************************************")
+
+    for name, board in zip(symmetryNames, symmetricBoards):
+        print(f"\n{name}:")
+        print_board(converter.convertBack(board))
+
     # ヒント数の統一処理
     hintUnifier = UnifiedNumberOfHints(
         symmetricBoards, boardA, targetHintCount=28)
     unifiedBoards = hintUnifier.unifyHints()
 
-    # 数値から元の文字盤面に戻す
-    unifiedBoardsAsChars = []
-    for board in unifiedBoards:
-        unifiedBoardsAsChars.append(converter.convertBack(board))
-
-    # 対称性の名前
-    symmetryNames = ["horizontalSymmetry", "verticalSymmetry",
-                     "diagonalSymmetry", "antiDiagonalSymmetry"]
+    # ヒント数統一後の盤面を表示
+    print("\n******************************************")
+    print("ヒント数統一後の盤面:")
+    print("******************************************")
+    for name, board in zip(symmetryNames, unifiedBoards):
+        print(f"\n{name}:")
+        print_board(converter.convertBack(board))
 
     # 盤面を表示してユーザに選択させる
-    displayBoards(unifiedBoardsAsChars, symmetryNames)
     userChoice = getUserChoice(symmetryNames)
 
     # 選択された盤面を取得
@@ -232,7 +245,7 @@ def main():
 
     if uniqueSolution:
         print("最終的な唯一解:")
-        print_board(uniqueSolution)
+        print_board(converter.convertBack(uniqueSolution))
     else:
         print("唯一解の生成に失敗しました。")
 
