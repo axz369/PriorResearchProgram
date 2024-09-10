@@ -149,9 +149,16 @@ def generateUniqueSolution(board, boardName):
         print_board(board)
 
 
+# ヒント数を数える関数
+def count_hints(board):
+    return sum(1 for row in board for cell in row if cell != 0 and cell != '0')
+
 # 盤面表示関数
+
+
 def print_board(board):
     size = len(board)
+    print(f"ヒント数: {count_hints(board)}")
     print("+" + "---+" * size)
     for i, row in enumerate(board):
         print("|", end="")
