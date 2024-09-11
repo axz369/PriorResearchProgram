@@ -207,12 +207,8 @@ def main():
         printBoard(converter.convertBack(board))
 
     # ヒント数の統一処理
-    unifiedBoards = []
-    for symmetry_type, board in zip(symmetryTypes, symmetricBoards):
-        hintUnifier = UnifiedNumberOfHints(
-            [board], boardA, targetHintCount=28, symmetry_type=symmetry_type)
-        unifiedBoard = hintUnifier.unifyHints()[0]
-        unifiedBoards.append(unifiedBoard)
+    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=28)
+    unifiedBoards = hintUnifier.unifyHints()
 
     # ヒント数統一後の盤面を表示
     print("\n******************************************")
