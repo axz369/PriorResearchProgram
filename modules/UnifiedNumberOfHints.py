@@ -62,9 +62,9 @@ class UnifiedNumberOfHints:
         elif symmetry_type == 'vertical':
             return r, self.size - 1 - c
         elif symmetry_type == 'diagonal_up':
-            return c, r
+            return self.size - 1 - c, self.size - 1 - r  # 修正
         elif symmetry_type == 'diagonal_down':
-            return self.size - 1 - c, self.size - 1 - r
+            return c, r
 
     def printBoardStatus(self, board):
         print("更新後の盤面:")
