@@ -1,5 +1,5 @@
 import random
-from modules.CanBePlaced import CanBePlaced
+from utility.canBePlaced import canBePlaced
 
 
 class AddHintToLineSymmetry:
@@ -8,8 +8,6 @@ class AddHintToLineSymmetry:
         self.boardA = boardA  # 解盤面Aを追加
         self.size = len(board)
         self.possibleValues = list(range(1, self.size + 1))
-        # CanBePlacedクラスのインスタンスを作成
-        self.canBePlacedChecker = CanBePlaced(board, self.size)
         self.maxAttempts = 1000  # 再トライの最大回数を設定
 
     def addSymmetries(self):
@@ -59,7 +57,9 @@ class AddHintToLineSymmetry:
         # 現在の位置に値があり、かつ対称位置に値が入っていない場合
         if board_copy[row][col] != 0 and board_copy[oppositeRow][oppositeCol] == 0:
             # 解盤面Aの値を取得して対称位置に配置
-            board_copy[oppositeRow][oppositeCol] = self.boardA[oppositeRow][oppositeCol]
+            value = self.boardA[oppositeRow][oppositeCol]
+            if canBePlaced(board_copy, self.size, oppositeRow * self.size + oppositeCol, value):
+                board_copy[oppositeRow][oppositeCol] = value
 
     def getSymmetricBoards(self):
         # 4つの対称性に基づいた盤面を返す
