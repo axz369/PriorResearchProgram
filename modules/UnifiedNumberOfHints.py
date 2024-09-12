@@ -3,7 +3,7 @@ from utility.printBoard import printBoard
 
 
 class UnifiedNumberOfHints:
-    def __init__(self, boards, boardA, targetHintCount=28):
+    def __init__(self, boards, boardA, targetHintCount):
         self.boards = boards
         self.boardA = boardA
         self.size = len(boards[0])

@@ -13,12 +13,20 @@ from utility.printBoard import printBoard
 
 
 if __name__ == "__main__":
+    #########################################################
+    # プログラム設定
+    INPUT_FILE = 'input9.json'  # 読み込む盤面のJSONファイル
+    INPUT_KEY = 'input1'  # JSONファイル内の使用する入力キー
+    MAX_SOLUTIONS = 60  # 解生成の上限数
+    TARGET_HINT_COUNT = 28  # ヒント統一の規定値
+    #########################################################
+
     # JSONファイルを読み込む
-    with open('input16.json', 'r') as file:
+    with open(INPUT_FILE, 'r') as file:
         data = json.load(file)
 
     # 使用する数独の問題を選択
-    sudokuProblem = data["inputs"]["input1"]
+    sudokuProblem = data["inputs"][INPUT_KEY]
     board = sudokuProblem["board"]
     maxNumber = sudokuProblem["maxNumber"]
 
@@ -68,7 +76,7 @@ if __name__ == "__main__":
         printBoard(converter.convertBack(board))
 
     # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=28)
+    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
     unifiedBoards = hintUnifier.unifyHints()
 
     # ヒント数統一後の盤面を表示
@@ -88,7 +96,7 @@ if __name__ == "__main__":
 
     # 唯一解の生成
     startTime = time.time()
-    uniqueSolution = generateUniqueSolution(selectedBoard, selectedBoardName)
+    uniqueSolution = generateUniqueSolution(selectedBoard, selectedBoardName, MAX_SOLUTIONS)
     endTime = time.time()
 
     if uniqueSolution:
