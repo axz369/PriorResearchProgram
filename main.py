@@ -1,8 +1,6 @@
 import time
 import json
 
-from pulp import LpStatus
-
 from modules.ConvertToNumber import ConvertToNumber
 from modules.Validation import Validation
 from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
@@ -14,7 +12,7 @@ from utility.generateSolutionBoard import generateSolutionBoard
 from utility.printBoard import printBoard
 
 
-def main():
+if __name__ == "__main__":
     # JSONファイルを読み込む
     with open('input9.json', 'r') as file:
         data = json.load(file)
@@ -37,7 +35,7 @@ def main():
         dataConvertedToNumbers['charToNumberMap'], dataConvertedToNumbers['boardConvertedToNumber'], maxNumber)
     if not validator.check():
         print("バリデーション失敗")
-        return False
+        exit(1)
 
     # generateSolutionBoard関数を使用して解盤面Aを取得
     boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
@@ -45,7 +43,7 @@ def main():
 
     if not isSolutionGenerated:
         print("解盤面Aの生成に失敗しました。")
-        return False
+        exit(1)
     else:
         print("解盤面Aが生成されました")
         printBoard(converter.convertBack(boardA))
@@ -101,7 +99,3 @@ def main():
 
     generationTime = endTime - startTime
     print(f"生成時間: {generationTime:.2f}秒")
-
-
-if __name__ == "__main__":
-    main()
