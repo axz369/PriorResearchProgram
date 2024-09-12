@@ -15,9 +15,9 @@ from utility.printBoard import printBoard
 if __name__ == "__main__":
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input16.json'  # 読み込む盤面のJSONファイル
+    INPUT_FILE = 'input9.json'  # 読み込む盤面のJSONファイル
     INPUT_KEY = 'input1'  # JSONファイル内の使用する入力キー
-    MAX_SOLUTIONS = 60  # 解生成の上限数
+    MAX_SOLUTIONS = 10  # 解生成の上限数
     TARGET_HINT_COUNT = 28  # ヒント統一の規定値
     #########################################################
 
@@ -100,8 +100,7 @@ if __name__ == "__main__":
     endTime = time.time()
 
     if uniqueSolution:
-        print("最終的な唯一解:")
-        printBoard(converter.convertBack(uniqueSolution))
+        print("唯一解を持つ問題例:")
     else:
         print("唯一解の生成に失敗しました。")
 

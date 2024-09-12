@@ -6,6 +6,7 @@ from utility.printBoard import printBoard
 
 def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
     start_time = time.time()
+    numberOfHintsAdded = 0  # 追加したヒントの数をカウントする変数
 
     print("唯一解生成開始")
     print(f"選ばれた盤面 : {boardName}")
@@ -70,7 +71,7 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
             current_time = time.time()
             if current_time - start_time > 1800:  # 30分（1800秒）を超えた場合
                 print("30分を超えたため処理を終了します。")
-                return None
+                return None, numberOfHintsAdded  # numberOfHintsAddedも返す
 
             # 問題を解く. ()の中はソルバーの出力off設定
             status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
@@ -115,7 +116,8 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
         if solution_count == 1:
             print("唯一解が見つかりました。")
             print("唯一解生成終了")
-            return last_solution
+            print(f"追加したヒントの数: {numberOfHintsAdded}")
+            return last_solution, numberOfHintsAdded
 
         # 最小出現回数のマスを見つける
         min_count = float('inf')
@@ -132,13 +134,18 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
 
         if min_pos is None:
             print("エラー: 最小出現回数のマスが見つかりませんでした。")
-            return None
+            return None, numberOfHintsAdded  # numberOfHintsAddedも返す
 
         # 最小出現回数のマスを盤面に追加
         i, j = min_pos
         board[i][j] = min_value
+        numberOfHintsAdded += 1  # ヒントを追加したのでカウントを増やす
         print(f"マス ({i + 1}, {j + 1}) に {min_value} を追加しました。")
+        print(f"現在追加したヒントの数: {numberOfHintsAdded}")
 
         # 盤面の表示
         print("現在の盤面:")
         printBoard(board)
+
+    # While ループが正常に終了した場合（通常はここには到達しない）
+    return None, numberOfHintsAdded
