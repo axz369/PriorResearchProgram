@@ -98,8 +98,10 @@ def generateUniqueSolution(board, boardName):
                     [(isValueInCell[i][j][solution[i][j]], 1)
                      for i in range(size) for j in range(size)]
                 )
+
                 # 新しい制約を問題に追加
-                problem += new_constraint <= 80  # 80マスまでの一致を許容
+                max_matching_cells = size * size - 1  # 全マス数から1を引いた値
+                problem += new_constraint <= max_matching_cells
 
                 print(f"\n解 {solution_count} が見つかりました:")
                 printBoard(solution)

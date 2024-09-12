@@ -14,7 +14,7 @@ from utility.printBoard import printBoard
 
 if __name__ == "__main__":
     # JSONファイルを読み込む
-    with open('input9.json', 'r') as file:
+    with open('input16.json', 'r') as file:
         data = json.load(file)
 
     # 使用する数独の問題を選択
