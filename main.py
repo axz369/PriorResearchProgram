@@ -15,10 +15,10 @@ from utility.printBoard import printBoard
 if __name__ == "__main__":
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input9.json'  # 読み込む盤面のJSONファイル
-    INPUT_KEY = 'input1'  # JSONファイル内の使用する入力キー
+    INPUT_FILE = 'input25.json'  # 読み込む盤面のJSONファイル
+    INPUT_KEY = 'input3'  # JSONファイル内の使用する入力キー
     MAX_SOLUTIONS = 10  # 解生成の上限数
-    TARGET_HINT_COUNT = 28  # ヒント統一の規定値
+    TARGET_HINT_COUNT = 100  # ヒント統一の規定値
     #########################################################
 
     # JSONファイルを読み込む
@@ -44,6 +44,8 @@ if __name__ == "__main__":
     if not validator.check():
         print("バリデーション失敗")
         exit(1)
+    else:
+        print("バリデーション成功")
 
     # generateSolutionBoard関数を使用して解盤面Aを取得
     boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
