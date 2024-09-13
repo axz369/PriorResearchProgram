@@ -18,8 +18,6 @@ class Validation:
             return False
         if not self.checkCharCount():
             return False
-        if not self.checkSolutionExists():
-            return False
         return True
 
     def checkRows(self):
@@ -57,7 +55,3 @@ class Validation:
             print("Validation失敗 : 入力された盤面の文字の種類数がmaxNumberを超えている")
             return False
         return True
-
-    def checkSolutionExists(self):
-        solutionBoard = [row[:] for row in self.board]  # boardのコピーを作成
-        return generateSolutionBoard(solutionBoard, 0, 0)
