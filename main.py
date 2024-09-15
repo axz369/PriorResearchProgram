@@ -48,7 +48,8 @@ if __name__ == "__main__":
         print("バリデーション成功")
 
     # generateSolutionBoard関数を使用して解盤面Aを取得
-    boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
+    boardA = [row[:]
+              for row in dataConvertedToNumbers['boardConvertedToNumber']]
     isSolutionGenerated = generateSolutionBoard(boardA)  # 解盤面Aを生成
 
     if not isSolutionGenerated:
@@ -78,7 +79,8 @@ if __name__ == "__main__":
         printBoard(converter.convertBack(board))
 
     # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
+    hintUnifier = UnifiedNumberOfHints(
+        symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
     unifiedBoards = hintUnifier.unifyHints()
 
     # ヒント数統一後の盤面を表示
@@ -103,8 +105,16 @@ if __name__ == "__main__":
     endTime = time.time()
 
     if uniqueSolution:
-        print("唯一解を持つ問題例:")
+        print("\n******************************************")
+        print("唯一解を持つ問題例(数字):")
+        print("******************************************")
         printBoard(uniqueSolution)
+
+        # 数値から文字に変換して表示
+        print("\n******************************************")
+        print("文字に変換された問題例(文字):")
+        print("******************************************")
+        printBoard(converter.convertBack(uniqueSolution))
     else:
         print("唯一解の生成に失敗しました。")
 
