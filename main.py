@@ -15,10 +15,10 @@ from utility.printBoard import printBoard
 if __name__ == "__main__":
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input16.json'  # 読み込む盤面のJSONファイル
+    INPUT_FILE = 'input9.json'  # 読み込む盤面のJSONファイル
     INPUT_KEY = 'input1'  # JSONファイル内の使用する入力キー
-    MAX_SOLUTIONS = 10  # 解生成の上限数
-    TARGET_HINT_COUNT = 100  # ヒント統一の規定値
+    MAX_SOLUTIONS = 30  # 解生成の上限数
+    TARGET_HINT_COUNT = 28  # ヒント統一の規定値
     #########################################################
 
     # JSONファイルを読み込む
@@ -98,7 +98,8 @@ if __name__ == "__main__":
 
     # 唯一解の生成
     startTime = time.time()
-    uniqueSolution = generateUniqueSolution(selectedBoard, selectedBoardName, MAX_SOLUTIONS)
+    uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolution(
+        selectedBoard, selectedBoardName, MAX_SOLUTIONS)
     endTime = time.time()
 
     if uniqueSolution:
@@ -108,3 +109,10 @@ if __name__ == "__main__":
 
     generationTime = endTime - startTime
     print(f"生成時間: {generationTime:.2f}秒")
+
+    # 各内部ループで生成された解の数を表示
+    print("\n******************************************")
+    print("各内部ループで生成された解の数:")
+    print("******************************************")
+    for iteration, solutions in enumerate(solutionsPerIteration, 1):
+        print(f"ループ {iteration}: {solutions} 個の解が生成されました")

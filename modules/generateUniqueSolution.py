@@ -7,6 +7,7 @@ from utility.printBoard import printBoard
 def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
     start_time = time.time()
     numberOfHintsAdded = 0  # 追加したヒントの数をカウントする変数
+    numberOfGeneratedBoards = []  # 各内部ループで生成された解の数を保存するリスト
 
     print("唯一解生成開始")
     print(f"選ばれた盤面 : {boardName}")
@@ -71,7 +72,7 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
             current_time = time.time()
             if current_time - start_time > 1800:  # 30分（1800秒）を超えた場合
                 print("30分を超えたため処理を終了します。")
-                return None, numberOfHintsAdded  # numberOfHintsAddedも返す
+                return None, numberOfHintsAdded, numberOfGeneratedBoards  # numberOfGeneratedBoardsも返す
 
             # 問題を解く. ()の中はソルバーの出力off設定
             status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
@@ -112,12 +113,15 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
 
         print(f"生成された解の数: {solution_count}")
 
+        # 内部ループで生成された解の数を保存
+        numberOfGeneratedBoards.append(solution_count)
+
         # 解盤面が一つしか見つからなかった(唯一解が確定)
         if solution_count == 1:
             print("唯一解が見つかりました。")
             print("唯一解生成終了")
             print(f"追加したヒントの数: {numberOfHintsAdded}")
-            return last_solution, numberOfHintsAdded
+            return last_solution, numberOfHintsAdded, numberOfGeneratedBoards
 
         # 最小出現回数のマスを見つける
         min_count = float('inf')
@@ -134,7 +138,7 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
 
         if min_pos is None:
             print("エラー: 最小出現回数のマスが見つかりませんでした。")
-            return None, numberOfHintsAdded  # numberOfHintsAddedも返す
+            return None, numberOfHintsAdded, numberOfGeneratedBoards  # numberOfGeneratedBoardsも返す
 
         # 最小出現回数のマスを盤面に追加
         i, j = min_pos
@@ -148,4 +152,4 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
         printBoard(board)
 
     # While ループが正常に終了した場合（通常はここには到達しない）
-    return None, numberOfHintsAdded
+    return None, numberOfHintsAdded, numberOfGeneratedBoards
