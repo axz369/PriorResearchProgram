@@ -104,6 +104,7 @@ if __name__ == "__main__":
 
     if uniqueSolution:
         print("唯一解を持つ問題例:")
+        printBoard(uniqueSolution)
     else:
         print("唯一解の生成に失敗しました。")
 

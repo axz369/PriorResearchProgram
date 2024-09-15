@@ -121,7 +121,7 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
             print("唯一解が見つかりました。")
             print("唯一解生成終了")
             print(f"追加したヒントの数: {numberOfHintsAdded}")
-            return last_solution, numberOfHintsAdded, numberOfGeneratedBoards
+            return board, numberOfHintsAdded, numberOfGeneratedBoards  # 問題例の盤面(board)を返却
 
         # 最小出現回数のマスを見つける
         min_count = float('inf')
@@ -138,7 +138,7 @@ def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
 
         if min_pos is None:
             print("エラー: 最小出現回数のマスが見つかりませんでした。")
-            return None, numberOfHintsAdded, numberOfGeneratedBoards  # numberOfGeneratedBoardsも返す
+            return None, numberOfHintsAdded, numberOfGeneratedBoards
 
         # 最小出現回数のマスを盤面に追加
         i, j = min_pos
