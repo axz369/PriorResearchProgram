@@ -1,4 +1,3 @@
-import random
 from utility.canBePlaced import canBePlaced
 
 

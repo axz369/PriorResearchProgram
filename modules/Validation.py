@@ -1,5 +1,3 @@
-from utility.generateSolutionBoard import generateSolutionBoard
-
 class Validation:
     def __init__(self, charToNumberMap, board, maxNumber):
         self.charToNumberMap = charToNumberMap

@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input16.json'
+    INPUT_FILE = 'input9.json'
     INPUT_KEY = 'input1'
 
     if '9' in INPUT_FILE:
