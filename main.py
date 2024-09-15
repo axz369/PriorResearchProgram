@@ -13,12 +13,24 @@ from utility.printBoard import printBoard
 
 
 if __name__ == "__main__":
+
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input.json'  # 読み込む盤面のJSONファイル
-    INPUT_KEY = 'input1'  # JSONファイル内の使用する入力キー
-    MAX_SOLUTIONS = 30  # 解生成の上限数
-    TARGET_HINT_COUNT = 28  # ヒント統一の規定値
+    INPUT_FILE = 'input16.json'
+    INPUT_KEY = 'input1'
+
+    if '9' in INPUT_FILE:
+        MAX_SOLUTIONS = 60
+        TARGET_HINT_COUNT = 28
+    elif '16' in INPUT_FILE:
+        MAX_SOLUTIONS = 30
+        TARGET_HINT_COUNT = 100
+    elif '25' in INPUT_FILE:
+        MAX_SOLUTIONS = 10
+        TARGET_HINT_COUNT = 200
+    else:
+        MAX_SOLUTIONS = 10
+        TARGET_HINT_COUNT = 200
     #########################################################
 
     # JSONファイルを読み込む
