@@ -4,16 +4,12 @@ import pulp
 from utility.printBoard import printBoard
 
 
-def generateUniqueSolution(board, boardName, MAX_SOLUTIONS):
+def generateUniqueSolution(board, MAX_SOLUTIONS):
     start_time = time.time()
     numberOfHintsAdded = 0  # 追加したヒントの数をカウントする変数
     numberOfGeneratedBoards = []  # 各内部ループで生成された解の数を保存するリスト
 
     print("唯一解生成開始")
-    print(f"選ばれた盤面 : {boardName}")
-    for row in board:
-        print(row)
-
     size = len(board)
     max_solutions = MAX_SOLUTIONS  # 生成する解の最大数
 

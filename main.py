@@ -7,7 +7,6 @@ from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
 from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
 from modules.generateUniqueSolution import generateUniqueSolution
 
-from utility.getUserChoice import getUserChoice
 from utility.generateSolutionBoard import generateSolutionBoard
 from utility.printBoard import printBoard
 
@@ -103,17 +102,30 @@ if __name__ == "__main__":
         print(f"\n{symmetry_type}Symmetry:")
         printBoard(converter.convertBack(board))
 
-    # 盤面を表示してユーザに選択させる
-    userChoice = getUserChoice([f"{s}Symmetry" for s in symmetryTypes])
+    # 4盤面から選択
+    while True:
+        print("\nどの盤面を選びますか?")
+        for i, name in enumerate(symmetryTypes):
+            print(f"{i+1}: {name}Symmetry")
 
-    # 選択された盤面を取得
-    selectedBoard = unifiedBoards[userChoice]
-    selectedBoardName = f"{symmetryTypes[userChoice]}Symmetry"
+        try:
+            choice = int(input("選択: ")) - 1
+            if 0 <= choice < len(symmetryTypes):
+                selectedBoard = unifiedBoards[choice]
+                selectedBoardName = f"{symmetryTypes[choice]}Symmetry"
+                break
+            else:
+                print("無効な選択です。もう一度選んでください。")
+        except ValueError:
+            print("無効な入力です。数字で選択してください。")
+
+    print(f"選ばれた盤面 : {selectedBoardName}")
+    printBoard(selectedBoard)
 
     # 唯一解の生成
     startTime = time.time()
     uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolution(
-        selectedBoard, selectedBoardName, MAX_SOLUTIONS)
+        selectedBoard, MAX_SOLUTIONS)
     endTime = time.time()
 
     if uniqueSolution:
