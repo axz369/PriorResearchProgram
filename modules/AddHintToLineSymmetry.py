@@ -1,6 +1,3 @@
-from utility.canBePlaced import canBePlaced
-
-
 class AddHintToLineSymmetry:
     def __init__(self, board, boardA):
         self.board = board
@@ -55,10 +52,8 @@ class AddHintToLineSymmetry:
     def addToOppositePosition(self, board_copy, row, col, oppositeRow, oppositeCol):
         # 現在の位置に値があり、かつ対称位置に値が入っていない場合
         if board_copy[row][col] != 0 and board_copy[oppositeRow][oppositeCol] == 0:
-            # 解盤面Aの値を取得して対称位置に配置
-            value = self.boardA[oppositeRow][oppositeCol]
-            if canBePlaced(board_copy, self.size, oppositeRow * self.size + oppositeCol, value):
-                board_copy[oppositeRow][oppositeCol] = value
+            # 解盤面Aの値を対称位置に配置
+            board_copy[oppositeRow][oppositeCol] = self.boardA[oppositeRow][oppositeCol]
 
     def getSymmetricBoards(self):
         # 4つの対称性に基づいた盤面を返す
