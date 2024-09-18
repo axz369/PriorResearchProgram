@@ -15,12 +15,12 @@ if __name__ == "__main__":
 
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input9.json'
-    INPUT_KEY = 'input1'
+    INPUT_FILE = 'input16.json'
+    INPUT_KEY = 'input3'
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 60
-        TARGET_HINT_COUNT = 28
+        MAX_SOLUTIONS = 500
+        TARGET_HINT_COUNT = 26
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 30
         TARGET_HINT_COUNT = 100
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     while True:
         print("\nどの盤面を選びますか?")
         for i, name in enumerate(symmetryTypes):
-            print(f"{i+1}: {name}Symmetry")
+            print(f"{i + 1}: {name}Symmetry")
 
         try:
             choice = int(input("選択: ")) - 1
