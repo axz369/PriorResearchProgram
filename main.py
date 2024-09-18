@@ -15,15 +15,15 @@ if __name__ == "__main__":
 
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input16.json'
-    INPUT_KEY = 'input3'
+    INPUT_FILE = 'input9.json'
+    INPUT_KEY = 'input1'
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 500
-        TARGET_HINT_COUNT = 26
+        MAX_SOLUTIONS = 100
+        TARGET_HINT_COUNT = 27
     elif '16' in INPUT_FILE:
-        MAX_SOLUTIONS = 30
-        TARGET_HINT_COUNT = 100
+        MAX_SOLUTIONS = 200
+        TARGET_HINT_COUNT = 140
     elif '25' in INPUT_FILE:
         MAX_SOLUTIONS = 10
         TARGET_HINT_COUNT = 200
@@ -151,3 +151,12 @@ if __name__ == "__main__":
     print("******************************************")
     for iteration, solutions in enumerate(solutionsPerIteration, 1):
         print(f"ループ {iteration}: {solutions} 個の解が生成されました")
+
+    print("\n******************************************")
+    print("記録用")
+    print("******************************************")
+    print(f"{generationTime:.2f}")
+    # 解が1つだけの場合は除外する
+    solutions_list = [
+        solutions for solutions in solutionsPerIteration if solutions > 1]
+    print(f"{len(solutions_list)}{solutions_list}")
