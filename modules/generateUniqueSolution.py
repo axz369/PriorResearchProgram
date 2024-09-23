@@ -15,7 +15,6 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
 
     while True:  # 外部ループ:内部ループ内で解盤面が一つしか見つからなくなったら終了
         solution_count = 0  # 解の数をカウント
-        last_solution = None  # 最後に見つかった解を保持
 
         # 111~999の連続した配列 (0-indexedなので実際は[0][0][0]から[8][8][8])
         occurrence_count = [
@@ -83,8 +82,6 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
                             if pulp.value(isValueInCell[i][j][k]) == 1:
                                 solution[i][j] = k
 
-                last_solution = solution  # 最後の解を保持
-
                 # 111~999の連続した配列に情報を格納
                 for i in range(size):
                     for j in range(size):
@@ -117,6 +114,7 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
             print("唯一解が見つかりました。")
             print(f"追加したヒントの数: {numberOfHintsAdded}")
             return board, numberOfHintsAdded, numberOfGeneratedBoards
+        
         # 最小出現回数のマスを見つける
         min_count = float('inf')
         min_pos = None
