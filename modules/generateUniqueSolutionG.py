@@ -1,10 +1,10 @@
 import time
-import pulp
-
+import gurobipy as gp
+from gurobipy import GRB
 from utility.printBoard import printBoard
 
 
-def generateUniqueSolution(board, MAX_SOLUTIONS):
+def generateUniqueSolutionG(board, MAX_SOLUTIONS):
     start_time = time.time()
     numberOfHintsAdded = 0  # 追加したヒントの数をカウントする変数
     numberOfGeneratedBoards = []  # 各内部ループで生成された解の数を保存するリスト
@@ -20,47 +20,42 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
         occurrence_count = [
             [[0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
 
-        problem = pulp.LpProblem("Sudoku", pulp.LpMinimize)
+        # Gurobiモデルの作成
+        model = gp.Model("Sudoku")
+        model.setParam('OutputFlag', 0)  # ソルバー出力を抑制
 
         # 決定変数の作成
-        isValueInCell = pulp.LpVariable.dicts("IsValueInCell",
-                                              (range(size), range(size),
-                                               range(1, size + 1)),
-                                              cat='Binary')
+        isValueInCell = model.addVars(size, size, size, vtype=GRB.BINARY, name="IsValueInCell")
 
         # 制約条件の追加
         # 1. 各マスには1つの数字のみが入る
         for i in range(size):
             for j in range(size):
-                problem += pulp.lpSum([isValueInCell[i][j][k]
-                                      for k in range(1, size + 1)]) == 1
+                model.addConstr(sum(isValueInCell[i, j, k] for k in range(size)) == 1)
 
         # 2. 各行には1から9の数字が1つずつ入る
         for i in range(size):
-            for k in range(1, size + 1):
-                problem += pulp.lpSum([isValueInCell[i][j][k]
-                                      for j in range(size)]) == 1
+            for k in range(size):
+                model.addConstr(sum(isValueInCell[i, j, k] for j in range(size)) == 1)
 
         # 3. 各列には1から9の数字が1つずつ入る
         for j in range(size):
-            for k in range(1, size + 1):
-                problem += pulp.lpSum([isValueInCell[i][j][k]
-                                      for i in range(size)]) == 1
+            for k in range(size):
+                model.addConstr(sum(isValueInCell[i, j, k] for i in range(size)) == 1)
 
         # 4. 各3x3ブロックには1から9の数字が1つずつ入る
         block_size = int(size ** 0.5)
         for bi in range(block_size):
             for bj in range(block_size):
-                for k in range(1, size + 1):
-                    problem += pulp.lpSum([isValueInCell[i][j][k]
-                                           for i in range(bi * block_size, (bi + 1) * block_size)
-                                           for j in range(bj * block_size, (bj + 1) * block_size)]) == 1
+                for k in range(size):
+                    model.addConstr(sum(isValueInCell[i, j, k] for i in range(bi * block_size, (bi + 1) * block_size)
+                                        for j in range(bj * block_size, (bj + 1) * block_size)) == 1)
 
         # 5. 初期値（ヒント）の設定
         for i in range(size):
             for j in range(size):
                 if board[i][j] != 0:
-                    problem += isValueInCell[i][j][board[i][j]] == 1
+                    model.addConstr(isValueInCell[i, j, board[i][j] - 1] == 1)
 
         # 内部ループ
         while solution_count < max_solutions:
@@ -69,18 +64,17 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
                 print("30分を超えたため処理を終了します。")
                 return None, numberOfHintsAdded, numberOfGeneratedBoards  # numberOfGeneratedBoardsも返す
 
-            # 問題を解く. ()の中はソルバーの出力off設定
-            status = problem.solve(pulp.PULP_CBC_CMD(msg=False))
+            # モデルの解決
+            model.optimize()
 
-            # 新しい解盤面が見つかったら
-            if pulp.LpStatus[status] == 'Optimal':
+            if model.status == GRB.OPTIMAL:
                 solution_count += 1
                 solution = [[0 for _ in range(size)] for _ in range(size)]
                 for i in range(size):
                     for j in range(size):
-                        for k in range(1, size + 1):
-                            if pulp.value(isValueInCell[i][j][k]) == 1:
-                                solution[i][j] = k
+                        for k in range(size):
+                            if isValueInCell[i, j, k].x > 0.5:
+                                solution[i][j] = k + 1
 
                 # 111~999の連続した配列に情報を格納
                 for i in range(size):
@@ -89,14 +83,9 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
                         occurrence_count[i][j][value - 1] += 1
 
                 # 新しい解を除外する制約を作成
-                new_constraint = pulp.LpAffineExpression(
-                    [(isValueInCell[i][j][solution[i][j]], 1)
-                     for i in range(size) for j in range(size)]
-                )
-
-                # 新しい制約を問題に追加
+                new_constraint = sum(isValueInCell[i, j, solution[i][j] - 1] for i in range(size) for j in range(size))
                 max_matching_cells = size * size - 1  # 全マス数から1を引いた値
-                problem += new_constraint <= max_matching_cells
+                model.addConstr(new_constraint <= max_matching_cells)
 
                 print(f"\n解 {solution_count} が見つかりました:")
                 printBoard(solution)
@@ -106,15 +95,13 @@ def generateUniqueSolution(board, MAX_SOLUTIONS):
 
         print(f"生成された解の数: {solution_count}")
 
-        # 内部ループで生成された解の数を保存
         numberOfGeneratedBoards.append(solution_count)
 
-        # 解盤面が一つしか見つからなかった(唯一解が確定)
         if solution_count == 1:
             print("唯一解が見つかりました。")
             print(f"追加したヒントの数: {numberOfHintsAdded}")
             return board, numberOfHintsAdded, numberOfGeneratedBoards
-        
+
         # 最小出現回数のマスを見つける
         min_count = float('inf')
         min_pos = None

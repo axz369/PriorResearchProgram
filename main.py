@@ -1,14 +1,13 @@
-import time
-import json
-
-from modules.ConvertToNumber import ConvertToNumber
-from modules.Validation import Validation
-from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
-from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
-from modules.generateUniqueSolution import generateUniqueSolution
-
-from utility.generateSolutionBoard import generateSolutionBoard
 from utility.printBoard import printBoard
+from utility.generateSolutionBoard import generateSolutionBoard
+from modules.generateUniqueSolutionG import generateUniqueSolutionG
+from modules.generateUniqueSolutionP import generateUniqueSolutionP
+from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
+from modules.AddHintToLineSymmetry import AddHintToLineSymmetry
+from modules.Validation import Validation
+from modules.ConvertToNumber import ConvertToNumber
+import json
+import time
 
 
 if __name__ == "__main__":
@@ -16,10 +15,11 @@ if __name__ == "__main__":
     #########################################################
     # プログラム設定
     INPUT_FILE = 'input9.json'
-    INPUT_KEY = 'input1'
+    INPUT_KEY = 'input2'
+    SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 100
+        MAX_SOLUTIONS = 900
         TARGET_HINT_COUNT = 27
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 200
@@ -123,9 +123,12 @@ if __name__ == "__main__":
     printBoard(selectedBoard)
 
     # 唯一解の生成
+    # 唯一解生成の実行
     startTime = time.time()
-    uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolution(
-        selectedBoard, MAX_SOLUTIONS)
+    if SOLVER_TYPE == 'G':
+        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionG(selectedBoard, MAX_SOLUTIONS)
+    else:
+        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionP(selectedBoard, MAX_SOLUTIONS)
     endTime = time.time()
 
     if uniqueSolution:
