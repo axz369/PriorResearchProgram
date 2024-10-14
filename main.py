@@ -1,5 +1,6 @@
 from utility.printBoard import printBoard
-from utility.generateSolutionBoard import generateSolutionBoard
+from utility.generateSolutionBoardP import generateSolutionBoardWrapper as generateSolutionBoardP
+from utility.generateSolutionBoardG import generateSolutionBoardWrapper as generateSolutionBoardG
 from modules.generateUniqueSolutionG import generateUniqueSolutionG
 from modules.generateUniqueSolutionP import generateUniqueSolutionP
 from modules.UnifiedNumberOfHints import UnifiedNumberOfHints
@@ -14,7 +15,7 @@ if __name__ == "__main__":
 
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input9.json'
+    INPUT_FILE = 'input16.json'
     INPUT_KEY = 'input2'
     SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
 
@@ -22,8 +23,8 @@ if __name__ == "__main__":
         MAX_SOLUTIONS = 900
         TARGET_HINT_COUNT = 27
     elif '16' in INPUT_FILE:
-        MAX_SOLUTIONS = 200
-        TARGET_HINT_COUNT = 140
+        MAX_SOLUTIONS = 300
+        TARGET_HINT_COUNT = 100
     elif '25' in INPUT_FILE:
         MAX_SOLUTIONS = 10
         TARGET_HINT_COUNT = 200
@@ -59,9 +60,13 @@ if __name__ == "__main__":
         print("バリデーション成功")
 
     # generateSolutionBoard関数を使用して解盤面Aを取得
-    boardA = [row[:]
-              for row in dataConvertedToNumbers['boardConvertedToNumber']]
-    isSolutionGenerated = generateSolutionBoard(boardA)  # 解盤面Aを生成
+    boardA = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
+
+    # SOLVER_TYPE に基づいて解盤面Aを生成
+    if SOLVER_TYPE == 'P':
+        isSolutionGenerated = generateSolutionBoardP(boardA)  # PuLPを使用
+    else:
+        isSolutionGenerated = generateSolutionBoardG(boardA)  # Gurobiを使用
 
     if not isSolutionGenerated:
         print("解盤面Aの生成に失敗しました。")
@@ -71,8 +76,7 @@ if __name__ == "__main__":
         printBoard(converter.convertBack(boardA))
 
     # 対称性に基づいたヒントを追加するクラスを作成
-    symmetryAdder = AddHintToLineSymmetry(
-        dataConvertedToNumbers['boardConvertedToNumber'], boardA)
+    symmetryAdder = AddHintToLineSymmetry(dataConvertedToNumbers['boardConvertedToNumber'], boardA)
 
     # 4つの対称盤面を取得
     symmetricBoards = symmetryAdder.getSymmetricBoards()
@@ -90,8 +94,7 @@ if __name__ == "__main__":
         printBoard(converter.convertBack(board))
 
     # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(
-        symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
+    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
     unifiedBoards = hintUnifier.unifyHints()
 
     # ヒント数統一後の盤面を表示
@@ -160,6 +163,5 @@ if __name__ == "__main__":
     print("******************************************")
     print(f"{generationTime:.2f}")
     # 解が1つだけの場合は除外する
-    solutions_list = [
-        solutions for solutions in solutionsPerIteration if solutions > 1]
+    solutions_list = [solutions for solutions in solutionsPerIteration if solutions > 1]
     print(f"{len(solutions_list)}{solutions_list}")
