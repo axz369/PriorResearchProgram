@@ -25,23 +25,27 @@ def generateUniqueSolutionG(board, MAX_SOLUTIONS):
         model.setParam('OutputFlag', 0)  # ソルバー出力を抑制
 
         # 決定変数の作成
-        isValueInCell = model.addVars(size, size, size, vtype=GRB.BINARY, name="IsValueInCell")
+        isValueInCell = model.addVars(
+            size, size, size, vtype=GRB.BINARY, name="IsValueInCell")
 
         # 制約条件の追加
         # 1. 各マスには1つの数字のみが入る
         for i in range(size):
             for j in range(size):
-                model.addConstr(sum(isValueInCell[i, j, k] for k in range(size)) == 1)
+                model.addConstr(
+                    sum(isValueInCell[i, j, k] for k in range(size)) == 1)
 
         # 2. 各行には1から9の数字が1つずつ入る
         for i in range(size):
             for k in range(size):
-                model.addConstr(sum(isValueInCell[i, j, k] for j in range(size)) == 1)
+                model.addConstr(
+                    sum(isValueInCell[i, j, k] for j in range(size)) == 1)
 
         # 3. 各列には1から9の数字が1つずつ入る
         for j in range(size):
             for k in range(size):
-                model.addConstr(sum(isValueInCell[i, j, k] for i in range(size)) == 1)
+                model.addConstr(
+                    sum(isValueInCell[i, j, k] for i in range(size)) == 1)
 
         # 4. 各3x3ブロックには1から9の数字が1つずつ入る
         block_size = int(size ** 0.5)
@@ -83,12 +87,13 @@ def generateUniqueSolutionG(board, MAX_SOLUTIONS):
                         occurrence_count[i][j][value - 1] += 1
 
                 # 新しい解を除外する制約を作成
-                new_constraint = sum(isValueInCell[i, j, solution[i][j] - 1] for i in range(size) for j in range(size))
+                new_constraint = sum(
+                    isValueInCell[i, j, solution[i][j] - 1] for i in range(size) for j in range(size))
                 max_matching_cells = size * size - 1  # 全マス数から1を引いた値
                 model.addConstr(new_constraint <= max_matching_cells)
 
-                print(f"\n解 {solution_count} が見つかりました:")
-                printBoard(solution)
+                print(f"解 {solution_count}")
+                # printBoard(solution)
             else:
                 print("全ての解盤面を生成しました．")
                 break

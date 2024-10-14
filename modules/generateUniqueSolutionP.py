@@ -99,8 +99,8 @@ def generateUniqueSolutionP(board, MAX_SOLUTIONS):
                 max_matching_cells = size * size - 1  # 全マス数から1を引いた値
                 problem += new_constraint <= max_matching_cells
 
-                print(f"\n解 {solution_count} が見つかりました:")
-                printBoard(solution)
+                print(f"解 {solution_count}")
+                # printBoard(solution)
             else:
                 print("全ての解盤面を生成しました．")
                 break

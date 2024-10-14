@@ -15,13 +15,13 @@ if __name__ == "__main__":
 
     #########################################################
     # プログラム設定
-    INPUT_FILE = 'input16.json'
+    INPUT_FILE = 'input9.json'
     INPUT_KEY = 'input2'
-    SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
+    SOLVER_TYPE = 'P'  # 'P':PuLP 'G':Gurobi
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 900
-        TARGET_HINT_COUNT = 27
+        MAX_SOLUTIONS = 3000
+        TARGET_HINT_COUNT = 10
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 300
         TARGET_HINT_COUNT = 100
