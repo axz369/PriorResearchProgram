@@ -9,6 +9,7 @@ from modules.Validation import Validation
 from modules.ConvertToNumber import ConvertToNumber
 import json
 import time
+import random  # ランダムなヒント追加のために追加
 
 
 if __name__ == "__main__":
@@ -16,14 +17,15 @@ if __name__ == "__main__":
     #########################################################
     # プログラム設定
     INPUT_FILE = 'input9.json'
-    INPUT_KEY = 'input2'
-    SOLVER_TYPE = 'P'  # 'P':PuLP 'G':Gurobi
-    AddHintToLineTarget = 1  # 1: 線対称にヒントを追加する, 0: 線対称ヒントを追加しない
+    INPUT_KEY = 'input1'
+
+    SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
+    AddHintToLineTarget = 0  # 1: 線対称にヒントを追加する, 0: 線対称ヒントを追加しない
     LIMIT_TIME = 60
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 6000
-        TARGET_HINT_COUNT = 10
+        MAX_SOLUTIONS = 60000
+        TARGET_HINT_COUNT = 27
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 300
         TARGET_HINT_COUNT = 80
@@ -130,9 +132,33 @@ if __name__ == "__main__":
         printBoard(selectedBoard)
     else:
         # 対称性に基づいたヒント追加を行わない場合
-        selectedBoard = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
-        selectedBoardName = "Input Board"
-        print(f"対称性に基づいたヒント追加を行わず入力盤面から唯一解処理を行います。")
+        # 解盤面Aからランダムな位置にTARGET_HINT_COUNT個のヒントを追加する
+        selectedBoard = [[0 for _ in range(maxNumber)] for _ in range(maxNumber)]  # 空の盤面を作成
+        positions = [(i, j) for i in range(maxNumber) for j in range(maxNumber)]  # 全てのセルの位置をリスト化
+        random.shuffle(positions)  # 位置をシャッフル
+
+        # 既に入力盤面にヒントがある場合、それを優先して追加
+        hints_added = 0
+        for i in range(maxNumber):
+            for j in range(maxNumber):
+                if dataConvertedToNumbers['boardConvertedToNumber'][i][j] != 0:
+                    selectedBoard[i][j] = dataConvertedToNumbers['boardConvertedToNumber'][i][j]
+                    hints_added += 1
+
+        # 残りのヒント数を計算
+        remaining_hints = TARGET_HINT_COUNT - hints_added
+
+        # ランダムな位置にヒントを追加
+        for pos in positions:
+            if hints_added >= TARGET_HINT_COUNT:
+                break
+            i, j = pos
+            if selectedBoard[i][j] == 0:
+                selectedBoard[i][j] = boardA[i][j]
+                hints_added += 1
+
+        selectedBoardName = "Random Hints"
+        print(f"対称性に基づいたヒント追加を行わず、解盤面Aからランダムにヒントを追加しました。")
         print(f"選ばれた盤面 : {selectedBoardName}")
         printBoard(selectedBoard)
 
