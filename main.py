@@ -17,15 +17,16 @@ if __name__ == "__main__":
     # プログラム設定
     INPUT_FILE = 'input9.json'
     INPUT_KEY = 'input2'
-    SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
-    AddHintToLineTarget = 0  # 1: 線対称にヒントを追加する, 0: 線対称ヒントを追加しない
+    SOLVER_TYPE = 'P'  # 'P':PuLP 'G':Gurobi
+    AddHintToLineTarget = 1  # 1: 線対称にヒントを追加する, 0: 線対称ヒントを追加しない
+    LIMIT_TIME = 60
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 600
+        MAX_SOLUTIONS = 6000
         TARGET_HINT_COUNT = 10
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 300
-        TARGET_HINT_COUNT = 100
+        TARGET_HINT_COUNT = 80
     elif '25' in INPUT_FILE:
         MAX_SOLUTIONS = 10
         TARGET_HINT_COUNT = 200
@@ -139,9 +140,9 @@ if __name__ == "__main__":
     # 唯一解生成の実行
     startTime = time.time()
     if SOLVER_TYPE == 'G':
-        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionG(selectedBoard, MAX_SOLUTIONS)
+        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionG(selectedBoard, MAX_SOLUTIONS, LIMIT_TIME)
     else:
-        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionP(selectedBoard, MAX_SOLUTIONS)
+        uniqueSolution, numberOfHintsAdded, solutionsPerIteration = generateUniqueSolutionP(selectedBoard, MAX_SOLUTIONS, LIMIT_TIME)
     endTime = time.time()
 
     if uniqueSolution:

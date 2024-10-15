@@ -5,7 +5,7 @@ import pulp
 from utility.printBoard import printBoard
 
 
-def generateUniqueSolutionP(board, MAX_SOLUTIONS):
+def generateUniqueSolutionP(board, MAX_SOLUTIONS, LIMIT_TIME):
     start_time = time.time()
     numberOfHintsAdded = 0  # 追加したヒントの数をカウントする変数
     numberOfGeneratedBoards = []  # 各内部ループで生成された解の数を保存するリスト
@@ -66,8 +66,8 @@ def generateUniqueSolutionP(board, MAX_SOLUTIONS):
         # 内部ループ
         while solution_count < max_solutions:
             current_time = time.time()
-            if current_time - start_time > 1800:  # 30分（1800秒）を超えた場合
-                print("30分を超えたため処理を終了します。")
+            if current_time - start_time > LIMIT_TIME:  # LIMIT_TIMEを超えた場合
+                print("制限時間を超えたため処理を終了します。")
                 return None, numberOfHintsAdded, numberOfGeneratedBoards  # numberOfGeneratedBoardsも返す
 
             # 問題を解く. ()の中はソルバーの出力off設定
