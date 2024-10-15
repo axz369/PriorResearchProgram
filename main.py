@@ -17,10 +17,11 @@ if __name__ == "__main__":
     # プログラム設定
     INPUT_FILE = 'input9.json'
     INPUT_KEY = 'input2'
-    SOLVER_TYPE = 'P'  # 'P':PuLP 'G':Gurobi
+    SOLVER_TYPE = 'G'  # 'P':PuLP 'G':Gurobi
+    AddHintToLineTarget = 0  # 1: 線対称にヒントを追加する, 0: 線対称ヒントを追加しない
 
     if '9' in INPUT_FILE:
-        MAX_SOLUTIONS = 3000
+        MAX_SOLUTIONS = 600
         TARGET_HINT_COUNT = 10
     elif '16' in INPUT_FILE:
         MAX_SOLUTIONS = 300
@@ -75,55 +76,64 @@ if __name__ == "__main__":
         print("解盤面Aが生成されました")
         printBoard(converter.convertBack(boardA))
 
-    # 対称性に基づいたヒントを追加するクラスを作成
-    symmetryAdder = AddHintToLineSymmetry(dataConvertedToNumbers['boardConvertedToNumber'], boardA)
+    # AddHintToLineTarget の値に応じて対称性に基づいたヒント追加を行う
+    if AddHintToLineTarget == 1:
+        # 対称性に基づいたヒントを追加するクラスを作成
+        symmetryAdder = AddHintToLineSymmetry(dataConvertedToNumbers['boardConvertedToNumber'], boardA)
 
-    # 4つの対称盤面を取得
-    symmetricBoards = symmetryAdder.getSymmetricBoards()
+        # 4つの対称盤面を取得
+        symmetricBoards = symmetryAdder.getSymmetricBoards()
 
-    # 対称性タイプのリストを定義
-    symmetryTypes = ["horizontal", "vertical", "diagonal_up", "diagonal_down"]
+        # 対称性タイプのリストを定義
+        symmetryTypes = ["horizontal", "vertical", "diagonal_up", "diagonal_down"]
 
-    # 対称軸に追加した直後の盤面を表示
-    print("******************************************")
-    print("対称軸に追加した直後の盤面:")
-    print("******************************************")
+        # 対称軸に追加した直後の盤面を表示
+        print("******************************************")
+        print("対称軸に追加した直後の盤面:")
+        print("******************************************")
 
-    for symmetry_type, board in zip(symmetryTypes, symmetricBoards):
-        print(f"\n{symmetry_type}Symmetry:")
-        printBoard(converter.convertBack(board))
+        for symmetry_type, board in zip(symmetryTypes, symmetricBoards):
+            print(f"\n{symmetry_type}Symmetry:")
+            printBoard(converter.convertBack(board))
 
-    # ヒント数の統一処理
-    hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
-    unifiedBoards = hintUnifier.unifyHints()
+        # ヒント数の統一処理
+        hintUnifier = UnifiedNumberOfHints(symmetricBoards, boardA, targetHintCount=TARGET_HINT_COUNT)
+        unifiedBoards = hintUnifier.unifyHints()
 
-    # ヒント数統一後の盤面を表示
-    print("\n******************************************")
-    print("ヒント数統一後の盤面:")
-    print("******************************************")
-    for symmetry_type, board in zip(symmetryTypes, unifiedBoards):
-        print(f"\n{symmetry_type}Symmetry:")
-        printBoard(converter.convertBack(board))
+        # ヒント数統一後の盤面を表示
+        print("\n******************************************")
+        print("ヒント数統一後の盤面:")
+        print("******************************************")
+        for symmetry_type, board in zip(symmetryTypes, unifiedBoards):
+            print(f"\n{symmetry_type}Symmetry:")
+            printBoard(converter.convertBack(board))
 
-    # 4盤面から選択
-    while True:
-        print("\nどの盤面を選びますか?")
-        for i, name in enumerate(symmetryTypes):
-            print(f"{i + 1}: {name}Symmetry")
+        # 4盤面から選択
+        while True:
+            print("\nどの盤面を選びますか?")
+            for i, name in enumerate(symmetryTypes):
+                print(f"{i + 1}: {name}Symmetry")
 
-        try:
-            choice = int(input("選択: ")) - 1
-            if 0 <= choice < len(symmetryTypes):
-                selectedBoard = unifiedBoards[choice]
-                selectedBoardName = f"{symmetryTypes[choice]}Symmetry"
-                break
-            else:
-                print("無効な選択です。もう一度選んでください。")
-        except ValueError:
-            print("無効な入力です。数字で選択してください。")
+            try:
+                choice = int(input("選択: ")) - 1
+                if 0 <= choice < len(symmetryTypes):
+                    selectedBoard = unifiedBoards[choice]
+                    selectedBoardName = f"{symmetryTypes[choice]}Symmetry"
+                    break
+                else:
+                    print("無効な選択です。もう一度選んでください。")
+            except ValueError:
+                print("無効な入力です。数字で選択してください。")
 
-    print(f"選ばれた盤面 : {selectedBoardName}")
-    printBoard(selectedBoard)
+        print(f"選ばれた盤面 : {selectedBoardName}")
+        printBoard(selectedBoard)
+    else:
+        # 対称性に基づいたヒント追加を行わない場合
+        selectedBoard = [row[:] for row in dataConvertedToNumbers['boardConvertedToNumber']]
+        selectedBoardName = "Input Board"
+        print(f"対称性に基づいたヒント追加を行わず入力盤面から唯一解処理を行います。")
+        print(f"選ばれた盤面 : {selectedBoardName}")
+        printBoard(selectedBoard)
 
     # 唯一解の生成
     # 唯一解生成の実行
